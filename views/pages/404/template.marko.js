@@ -1,4 +1,6 @@
-// Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
+// Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
 var marko_template = module.exports = require("marko/html").t(__filename),
     marko_loadTemplate = require("marko/runtime/helper-loadTemplate"),
     default_template = marko_loadTemplate(require.resolve("../../layouts/default")),

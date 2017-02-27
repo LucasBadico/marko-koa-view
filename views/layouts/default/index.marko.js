@@ -1,4 +1,6 @@
-// Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
+// Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
 var marko_template = module.exports = require("marko/html").t(__filename),
     marko_helpers = require("marko/runtime/html/helpers"),
     marko_loadTag = marko_helpers.t,
@@ -12,10 +14,10 @@ var marko_template = module.exports = require("marko/html").t(__filename),
     layout_header_tag = marko_loadTag(layout_header_template),
     layout_footer_template = marko_loadTemplate(require.resolve("../../components/layout-footer")),
     layout_footer_tag = marko_loadTag(layout_footer_template),
-    init_widgets_tag = marko_loadTag(require("marko/widgets/taglib/init-widgets-tag")),
     lasso_body_tag = marko_loadTag(require("lasso/taglib/body-tag")),
     browser_refresh_tag = marko_loadTag(require("browser-refresh-taglib/refresh-tag")),
-    await_reorderer_tag = marko_loadTag(require("marko/taglibs/async/await-reorderer-tag"));
+    await_reorderer_tag = marko_loadTag(require("marko/taglibs/async/await-reorderer-tag")),
+    init_components_tag = marko_loadTag(require("marko/components/taglib/init-components-tag"));
 
 function render(input, out) {
   var data = input;
@@ -52,8 +54,6 @@ function render(input, out) {
 
   layout_footer_tag({}, out);
 
-  init_widgets_tag({}, out);
-
   out.w("<div id=\"toTop\"></div><script src=\"js/jquery-1.11.2.min.js\"></script><script src=\"js/common_scripts_min.js\"></script><script src=\"js/functions.js\"></script>");
 
   lasso_body_tag({}, out);
@@ -64,7 +64,7 @@ function render(input, out) {
 
   await_reorderer_tag({}, out);
 
-  init_widgets_tag({}, out);
+  init_components_tag({}, out);
 
   out.w("</body></html>");
 }
@@ -81,9 +81,9 @@ marko_template.meta = {
       "../../components/layout-inside-body-preloader",
       "../../components/layout-header",
       "../../components/layout-footer",
-      "marko/widgets/taglib/init-widgets-tag",
       "lasso/taglib/body-tag",
       "browser-refresh-taglib/refresh-tag",
-      "marko/taglibs/async/await-reorderer-tag"
+      "marko/taglibs/async/await-reorderer-tag",
+      "marko/components/taglib/init-components-tag"
     ]
   };

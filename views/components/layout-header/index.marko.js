@@ -1,4 +1,6 @@
-// Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
+// Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
 var marko_template = module.exports = require("marko/html").t(__filename),
     marko_component = {
         onCreate: function(input) {},
@@ -9,9 +11,9 @@ var marko_template = module.exports = require("marko/html").t(__filename),
             });
         }
       },
-    marko_widgets = require("marko/widgets"),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/layout-header/index.marko", function() {
+    marko_components = require("marko/components"),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/layout-header/index.marko", function() {
       return module.exports;
     }),
     marko_loadTemplate = require("marko/runtime/helper-loadTemplate"),
@@ -23,7 +25,7 @@ var marko_template = module.exports = require("marko/html").t(__filename),
     comp_menu_tag = marko_loadTag(comp_menu_template),
     marko_attr = marko_helpers.a;
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -31,7 +33,7 @@ function render(input, out, widget, state) {
   var sizeClassName = (input.size !== 'normal' && 'app-button-' + input.size);
 
   out.w("<header" +
-    marko_attr("id", widget.id) +
+    marko_attr("id", __component.id) +
     "><div id=\"top_line\"><div class=\"container\"><div class=\"row\"><div class=\"col-md-6 col-sm-6 col-xs-6\"><i class=\"icon-phone\"></i><strong>0045 043204434</strong></div><div class=\"col-md-6 col-sm-6 col-xs-6\"><ul id=\"top_links\">");
 
   comp_li_profile_popup_tag({
@@ -45,22 +47,18 @@ function render(input, out, widget, state) {
   out.w("</div></div></header>");
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 marko_template.meta = {
     deps: [
       "./style.less",
       {
           type: "require",
-          path: "./index.marko"
-        },
-      {
-          type: "require",
-          path: "marko/widgets"
+          path: "./"
         }
     ],
     tags: [
