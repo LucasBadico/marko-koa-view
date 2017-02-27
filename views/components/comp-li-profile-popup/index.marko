@@ -1,0 +1,84 @@
+
+static function isActive(link,actual) {
+	//console.log(link,actual);
+	
+		if(link == actual){
+			return 'active';
+		}
+		
+		return 'not-active';
+	}
+
+
+
+class {
+	onCreate(input) {
+		console.log('create ? li-comp-profile',input);
+		this.state = {};
+		this.state.fullname = input.user.fullname;
+		this.state.role = input.user.role;
+		
+		console.log(JSON.stringify(this.state));
+		
+    }
+
+    onInput(input) {
+	console.log('input',input);
+        return {
+			user: input.user ||'none',
+            size: input.size || 'normal',
+            variant: input.variant || 'primary',
+            body: input.label || input.renderBody,
+            className: input['class']
+        };
+    }
+	
+    handleClick(event) {
+        // Every Widget instance is also an EventEmitter instance.
+        // We will emit a custom "click" event when a DOM click event
+        // is triggered
+		console.log('click!', this.state);
+        this.emit('click', {
+            event: event // Pass along the DOM event in case it is helpful to others
+        });
+    }
+}
+
+$ var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
+$ var sizeClassName = (input.size !== 'normal' && 'app-button-' + input.size);
+
+<li>
+ 
+	<div class="dropdown dropdown-access">
+		
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="access_link">Sign in</a>
+                                    <div class="dropdown-menu">
+                                        <div class="row">
+                                            <div class="col-md-6 col-sm-6 col-xs-6">
+                                                <a href="#" class="bt_facebook">
+                                                    <i class="icon-facebook"></i>Facebook </a>
+                                            </div>
+                                            <div class="col-md-6 col-sm-6 col-xs-6">
+                                                <a href="#" class="bt_paypal">
+                                                    <i class="icon-paypal"></i>Paypal </a>
+                                            </div>
+                                        </div>
+                                        <div class="login-or">
+                                            <hr class="hr-or">
+                                            <span class="span-or">or  ${out.global.currentUser}</span>
+                                        </div>
+										
+                                        <div class="form-group">
+										
+										
+                                            <input type="text" class="form-control" id="inputUsernameEmail" placeholder="Email">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                                        </div>
+                                        <a id="forgot_pw" href="#">Forgot password?</a>
+                                        <input type="submit" name="Sign in" value="Sign in" id="Sign_in" class="button_drop">
+                                        <input type="submit" name="Sign up" value="Sign up" id="Sign_up" class="button_drop outline">
+                                    </div>
+    </div><!-- End Dropdown access -->                           
+</li>
