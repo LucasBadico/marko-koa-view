@@ -52,6 +52,8 @@ app.keys = ['behealth.homolog'];
 //		require('marko/node-require').install();
 //		
 //		app.use(function *() {
+//			console.log(this);
+//			
 //			var template = require('./views/pages/home/template.marko');
 //			template.render({
 //					// Adding the `i18n` variable to $global is required so
@@ -70,7 +72,12 @@ app.keys = ['behealth.homolog'];
 	// make sure it is added after everything else
 	app.use(function *(){
 	  // or redirect etc
-	   this.redirect('/404');
+		
+		
+		if(this.url.slice(1).match(/\//).length == 0){
+			this.redirect('/404');
+		}
+	   
 	});
 
 

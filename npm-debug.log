@@ -7,8 +7,8 @@
 6 silly lifecycle behealth@0.0.1~prestart: no script for prestart, continuing
 7 info lifecycle behealth@0.0.1~start: behealth@0.0.1
 8 verbose lifecycle behealth@0.0.1~start: unsafe-perm in lifecycle true
-9 verbose lifecycle behealth@0.0.1~start: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/macbook1/Documents/Repositorio/Be Heath/view-test/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/local/bin
-10 verbose lifecycle behealth@0.0.1~start: CWD: /Users/macbook1/Documents/Repositorio/Be Heath/view-test
+9 verbose lifecycle behealth@0.0.1~start: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/Badico/Documents/Repositorio/Be Heath/view-test/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/local/bin
+10 verbose lifecycle behealth@0.0.1~start: CWD: /Users/Badico/Documents/Repositorio/Be Heath/view-test
 11 silly lifecycle behealth@0.0.1~start: Args: [ '-c', 'node --harmony index.js' ]
 12 silly lifecycle behealth@0.0.1~start: Returned: code: 1  signal: null
 13 info lifecycle behealth@0.0.1~start: Failed to exec start script
@@ -23,8 +23,8 @@
 14 verbose stack     at maybeClose (internal/child_process.js:885:16)
 14 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:226:5)
 15 verbose pkgid behealth@0.0.1
-16 verbose cwd /Users/macbook1/Documents/Repositorio/Be Heath/view-test
-17 error Darwin 16.1.0
+16 verbose cwd /Users/Badico/Documents/Repositorio/Be Heath/view-test
+17 error Darwin 16.4.0
 18 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "start"
 19 error node v7.2.0
 20 error npm  v4.0.2

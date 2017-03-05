@@ -591,344 +591,9 @@ https://github.com/joyent/node/blob/master/lib/module.js
     }
 })();
 
-$_mod.remap("/marko$4.0.0-rc.18/widgets/index", "/marko$4.0.0-rc.18/widgets/index-browser");
-$_mod.remap("/marko$4.0.0-rc.18/widgets/init-widgets", "/marko$4.0.0-rc.18/widgets/init-widgets-browser");
-$_mod.installed("marko$4.0.0-rc.18", "warp10", "1.3.3");
-$_mod.def("/warp10$1.3.3/src/finalize", function(require, exports, module, __filename, __dirname) { var isArray = Array.isArray;
-
-function resolve(object, path, len) {
-    var current = object;
-    for (var i=0; i<len; i++) {
-        current = current[path[i]];
-    }
-
-    return current;
-}
-
-function resolveType(info) {
-    if (info.type === 'Date') {
-        return new Date(info.value);
-    } else {
-        throw new Error('Bad type');
-    }
-}
-
-module.exports = function finalize(outer) {
-    if (!outer) {
-        return outer;
-    }
-
-    var assignments = outer.$$;
-    if (assignments) {
-        var object = outer.o;
-        var len;
-
-        if (assignments && (len=assignments.length)) {
-            for (var i=0; i<len; i++) {
-                var assignment = assignments[i];
-
-                var rhs = assignment.r;
-                var rhsValue;
-
-                if (isArray(rhs)) {
-                    rhsValue = resolve(object, rhs, rhs.length);
-                } else {
-                    rhsValue = resolveType(rhs);
-                }
-
-                var lhs = assignment.l;
-                var lhsLast = lhs.length-1;
-
-                if (lhsLast === -1) {
-                    object = outer.o = rhsValue;
-                    break;
-                } else {
-                    var lhsParent = resolve(object, lhs, lhsLast);
-                    lhsParent[lhs[lhsLast]] = rhsValue;
-                }
-            }
-        }
-
-        assignments.length = 0; // Assignments have been applied, do not reapply
-
-        return object == null ? null : object;
-    } else {
-        return outer;
-    }
-
-};
-});
-$_mod.def("/warp10$1.3.3/finalize", function(require, exports, module, __filename, __dirname) { module.exports = require('/warp10$1.3.3/src/finalize'/*'./src/finalize'*/);
-});
-$_mod.remap("/marko$4.0.0-rc.18/widgets/util", "/marko$4.0.0-rc.18/widgets/util-browser");
-$_mod.def("/marko$4.0.0-rc.18/widgets/util-browser", function(require, exports, module, __filename, __dirname) { var widgetLookup = {};
-
-var defaultDocument = document;
-
-function getWidgetForEl(el, doc) {
-    if (el) {
-        var node = typeof el === 'string' ? (doc || defaultDocument).getElementById(el) : el;
-        if (node) {
-            var widget = node._w;
-
-            while(widget) {
-                var rootFor = widget.$__rootFor;
-                if (rootFor)  {
-                    widget = rootFor;
-                } else {
-                    break;
-                }
-            }
-
-            return widget;
-        }
-    }
-}
-
-var lifecycleEventMethods = {};
-
-[
-    'create',
-    'render',
-    'update',
-    'mount',
-    'destroy',
-].forEach(function(eventName) {
-    lifecycleEventMethods[eventName] = 'on' + eventName[0].toUpperCase() + eventName.substring(1);
-});
-
-/**
- * This method handles invoking a widget's event handler method
- * (if present) while also emitting the event through
- * the standard EventEmitter.prototype.emit method.
- *
- * Special events and their corresponding handler methods
- * include the following:
- *
- * beforeDestroy --> onBeforeDestroy
- * destroy       --> onDestroy
- * beforeUpdate  --> onBeforeUpdate
- * update        --> onUpdate
- * render        --> onRender
- */
-function emitLifecycleEvent(widget, eventType, eventArg1, eventArg2) {
-    var listenerMethod = widget[lifecycleEventMethods[eventType]];
-
-    if (listenerMethod) {
-        listenerMethod.call(widget, eventArg1, eventArg2);
-    }
-
-    widget.emit(eventType, eventArg1, eventArg2);
-}
-
-function destroyWidgetForEl(el) {
-    var widgetToDestroy = el._w;
-    if (widgetToDestroy) {
-        widgetToDestroy.$__destroyShallow();
-        el._w = null;
-
-        while ((widgetToDestroy = widgetToDestroy.$__rootFor)) {
-            widgetToDestroy.$__rootFor = null;
-            widgetToDestroy.$__destroyShallow();
-        }
-    }
-}
-function destroyElRecursive(el) {
-    var curChild = el.firstChild;
-    while(curChild) {
-        if (curChild.nodeType == 1) {
-            destroyWidgetForEl(curChild);
-            destroyElRecursive(curChild);
-        }
-        curChild = curChild.nextSibling;
-    }
-}
-
-var nextUniqueId = 0;
-
-function nextWidgetId() {
-    return 'wc' + (nextUniqueId++);
-}
-
-function getElementById(doc, id) {
-    return doc.getElementById(id);
-}
-
-function attachBubblingEvent(widgetDef, handlerMethodName, extraArgs) {
-    if (handlerMethodName) {
-        return extraArgs ?
-            [handlerMethodName, widgetDef.id, extraArgs] :
-            [handlerMethodName, widgetDef.id];
-    }
-}
-
-exports.$__widgetLookup = widgetLookup;
-exports.$__getWidgetForEl = getWidgetForEl;
-exports.$__emitLifecycleEvent = emitLifecycleEvent;
-exports.$__destroyWidgetForEl = destroyWidgetForEl;
-exports.$__destroyElRecursive = destroyElRecursive;
-exports.$__nextWidgetId = nextWidgetId;
-exports.$__getElementById = getElementById;
-exports.$__attachBubblingEvent = attachBubblingEvent;
-});
-$_mod.def("/marko$4.0.0-rc.18/widgets/bubble", function(require, exports, module, __filename, __dirname) { module.exports = [
-    /* Mouse Events */
-    'click',
-    'dblclick',
-    'mousedown',
-    'mouseup',
-    // 'mouseover',
-    // 'mousemove',
-    // 'mouseout',
-    'dragstart',
-    'drag',
-    // 'dragenter',
-    // 'dragleave',
-    // 'dragover',
-    'drop',
-    'dragend',
-
-    /* Keyboard Events */
-    'keydown',
-    'keypress',
-    'keyup',
-
-    /* Form Events */
-    'select',
-    'change',
-    'submit',
-    'reset',
-    'input',
-
-    'attach', // Pseudo event supported by Marko
-    'detach'  // Pseudo event supported by Marko
-
-    // 'focus', <-- Does not bubble
-    // 'blur', <-- Does not bubble
-    // 'focusin', <-- Not supported in all browsers
-    // 'focusout' <-- Not supported in all browsers
-];
-});
-$_mod.def("/marko$4.0.0-rc.18/widgets/event-delegation", function(require, exports, module, __filename, __dirname) { var widgetLookup = require('/marko$4.0.0-rc.18/widgets/util-browser'/*'./util'*/).$__widgetLookup;
-var isArray = Array.isArray;
-
-var listenersAttached;
-
-function getEventAttribute(el, attrName) {
-    var virtualAttrs = el._vattrs;
-
-    if (virtualAttrs) {
-        return el._vattrs[attrName];
-    } else {
-        var attrValue = el.getAttribute(attrName);
-        if (attrValue) {
-            // <method_name> <widget_id>[ <extra_args_index]
-            var parts = attrValue.split(' ');
-            if (parts.length == 3) {
-                parts[2] = parseInt(parts[2], 10);
-            }
-
-            return parts;
-        }
-    }
-}
-
-function delegateEvent(node, target, event) {
-    var targetMethod = target[0];
-    var targetWidgetId = target[1];
-    var extraArgs = target[2];
-
-    var targetWidget = widgetLookup[targetWidgetId];
-
-
-    if (!targetWidget) {
-        return;
-    }
-
-    var targetFunc = targetWidget[targetMethod];
-    if (!targetFunc) {
-        throw Error('Method not found: ' + targetMethod);
-    }
-
-    if (extraArgs != null) {
-        if (typeof extraArgs === 'number') {
-            extraArgs = targetWidget.$__bubblingDomEvents[extraArgs];
-            if (!isArray(extraArgs)) {
-                extraArgs = [extraArgs];
-            }
-        }
-    }
-
-    // Invoke the widget method
-    if (extraArgs) {
-        targetFunc.apply(targetWidget, extraArgs.concat(event, node));
-    } else {
-        targetFunc.call(targetWidget, event, node);
-    }
-}
-
-function attachBubbleEventListeners(doc) {
-    var body = doc.body;
-    // Here's where we handle event delegation using our own mechanism
-    // for delegating events. For each event that we have white-listed
-    // as supporting bubble, we will attach a listener to the root
-    // document.body element. When we get notified of a triggered event,
-    // we again walk up the tree starting at the target associated
-    // with the event to find any mappings for event. Each mapping
-    // is from a DOM event type to a method of a widget.
-    require('/marko$4.0.0-rc.18/widgets/bubble'/*'./bubble'*/).forEach(function addBubbleHandler(eventType) {
-        body.addEventListener(eventType, function(event) {
-            var propagationStopped = false;
-
-            // Monkey-patch to fix #97
-            var oldStopPropagation = event.stopPropagation;
-
-            event.stopPropagation = function() {
-                oldStopPropagation.call(event);
-                propagationStopped = true;
-            };
-
-            var curNode = event.target;
-            if (!curNode) {
-                return;
-            }
-
-            // Search up the tree looking DOM events mapped to target
-            // widget methods
-            var attrName = 'data-_on' + eventType;
-            var target;
-
-            // Attributes will have the following form:
-            // on<event_type>("<target_method>|<widget_id>")
-
-            do {
-                if ((target = getEventAttribute(curNode, attrName))) {
-                    delegateEvent(curNode, target, event);
-
-                    if (propagationStopped) {
-                        break;
-                    }
-                }
-            } while((curNode = curNode.parentNode) && curNode.getAttribute);
-        });
-    });
-}
-
-function noop() {}
-
-exports.$__handleNodeAttach = noop;
-exports.$__handleNodeDetach = noop;
-exports.$__delegateEvent = delegateEvent;
-exports.$__getEventAttribute = getEventAttribute;
-
-exports.$__init = function(doc) {
-    if (!listenersAttached) {
-        listenersAttached = true;
-        attachBubbleEventListeners(doc);
-    }
-};
-});
-$_mod.installed("marko$4.0.0-rc.18", "events-light", "1.0.5");
+$_mod.installed("behealth$0.0.1", "marko", "4.0.0-rc.23");
+$_mod.main("/marko$4.0.0-rc.23/runtime/vdom", "");
+$_mod.installed("marko$4.0.0-rc.23", "events-light", "1.0.5");
 $_mod.main("/events-light$1.0.5", "src/index");
 $_mod.def("/events-light$1.0.5/src/index", function(require, exports, module, __filename, __dirname) { /* jshint newcap:false */
 var slice = Array.prototype.slice;
@@ -1097,791 +762,7 @@ EventEmitter.prototype = {
 
 module.exports = EventEmitter;
 });
-$_mod.def("/marko$4.0.0-rc.18/runtime/events", function(require, exports, module, __filename, __dirname) { var EventEmitter = require('/events-light$1.0.5/src/index'/*'events-light'*/);
-module.exports = new EventEmitter();
-});
-$_mod.def("/marko$4.0.0-rc.18/widgets/nextRepeatedId", function(require, exports, module, __filename, __dirname) { var REPEATED_ID_KEY = '$rep';
-
-module.exports = function nextRepeatedId(out, parentId, id) {
-    var nextIdLookup = out.global[REPEATED_ID_KEY] || (out.global[REPEATED_ID_KEY] = {});
-
-    var indexLookupKey = parentId + '-' + id;
-    var currentIndex = nextIdLookup[indexLookupKey];
-    if (currentIndex == null) {
-        currentIndex = nextIdLookup[indexLookupKey] = 0;
-    } else {
-        currentIndex = ++nextIdLookup[indexLookupKey];
-    }
-
-    return indexLookupKey.slice(0, -2) + '[' + currentIndex + ']';
-};
-
-});
-$_mod.installed("marko$4.0.0-rc.18", "raptor-util", "3.1.0");
-$_mod.def("/raptor-util$3.1.0/extend", function(require, exports, module, __filename, __dirname) { module.exports = function extend(target, source) { //A simple function to copy properties from one object to another
-    if (!target) { //Check if a target was provided, otherwise create a new empty object to return
-        target = {};
-    }
-
-    if (source) {
-        for (var propName in source) {
-            if (source.hasOwnProperty(propName)) { //Only look at source properties that are not inherited
-                target[propName] = source[propName]; //Copy the property
-            }
-        }
-    }
-
-    return target;
-};
-});
-$_mod.remap("/marko$4.0.0-rc.18/widgets/registry", "/marko$4.0.0-rc.18/widgets/registry-browser");
-$_mod.remap("/marko$4.0.0-rc.18/widgets/loadWidget", "/marko$4.0.0-rc.18/widgets/loadWidget-dynamic");
-$_mod.def("/marko$4.0.0-rc.18/widgets/loadWidget-dynamic", function(require, exports, module, __filename, __dirname) { 'use strict';
-
-module.exports = function load(typeName) {
-    // We make the assumption that the widget type name is a path to a
-    // fully resolved module path and that the module exists
-    // as a CommonJS module
-    return require(typeName);
-};
-});
-$_mod.def("/marko$4.0.0-rc.18/widgets/State", function(require, exports, module, __filename, __dirname) { var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
-
-function ensure(state, propertyName) {
-    var proto = state.constructor.prototype;
-    if (!(propertyName in proto)) {
-        Object.defineProperty(proto, propertyName, {
-            get: function() {
-                return this.$__raw[propertyName];
-            },
-            set: function(value) {
-                this.$__set(propertyName, value, false /* ensure:false */);
-            }
-        });
-    }
-}
-
-function State(widget, initialState) {
-    this.$__widget = widget;
-    this.$__raw = initialState || {};
-
-    this.$__dirty = false;
-    this.$__old = null;
-    this.$__changes = null;
-    this.$__forced = null; // An object that we use to keep tracking of state properties that were forced to be dirty
-
-    if (initialState) {
-        for(var key in initialState) {
-            ensure(this, key);
-        }
-    }
-
-    Object.seal(this);
-}
-
-State.prototype = {
-    $__reset: function() {
-        var self = this;
-
-        self.$__dirty = false;
-        self.$__old = null;
-        self.$__changes = null;
-        self.$__forced = null;
-    },
-
-    $__replace: function(newState) {
-        var state = this;
-        var key;
-
-        var rawState = this.$__raw;
-
-        for (key in rawState) {
-            if (!(key in newState)) {
-                state.$__set(key, undefined, false /* ensure:false */, false /* forceDirty:false */);
-            }
-        }
-
-        for (key in newState) {
-            state.$__set(key, newState[key], true /* ensure:true */, false /* forceDirty:false */);
-        }
-    },
-    $__set: function(name, value, shouldEnsure, forceDirty) {
-        var rawState = this.$__raw;
-
-        if (shouldEnsure) {
-            ensure(this, name);
-        }
-
-        if (forceDirty) {
-            var forcedDirtyState = this.$__forced || (this.$__forced = {});
-            forcedDirtyState[name] = true;
-        } else if (rawState[name] === value) {
-            return;
-        }
-
-        if (!this.$__dirty) {
-            // This is the first time we are modifying the widget state
-            // so introduce some properties to do some tracking of
-            // changes to the state
-            this.$__dirty = true; // Mark the widget state as dirty (i.e. modified)
-            this.$__old = rawState;
-            this.$__raw = rawState = extend({}, rawState);
-            this.$__changes = {};
-            this.$__widget.$__queueUpdate();
-        }
-
-        this.$__changes[name] = value;
-
-        if (value === undefined) {
-            // Don't store state properties with an undefined or null value
-            delete rawState[name];
-        } else {
-            // Otherwise, store the new value in the widget state
-            rawState[name] = value;
-        }
-    },
-    toJSON: function() {
-        return this.$__raw;
-    }
-};
-
-module.exports = State;
-});
-$_mod.def("/marko$4.0.0-rc.18/runtime/dom-insert", function(require, exports, module, __filename, __dirname) { var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
-var widgetsUtil = require('/marko$4.0.0-rc.18/widgets/util-browser'/*'../widgets/util'*/);
-var destroyWidgetForEl = widgetsUtil.$__destroyWidgetForEl;
-var destroyElRecursive = widgetsUtil.$__destroyElRecursive;
-
-function resolveEl(el) {
-    if (typeof el === 'string') {
-        var elId = el;
-        el = document.getElementById(elId);
-        if (!el) {
-            throw Error('Not found: ' + elId);
-        }
-    }
-    return el;
-}
-
-function beforeRemove(referenceEl) {
-    destroyElRecursive(referenceEl);
-    destroyWidgetForEl(referenceEl);
-}
-
-module.exports = function(target, getEl, afterInsert) {
-    extend(target, {
-        appendTo: function(referenceEl) {
-            referenceEl = resolveEl(referenceEl);
-            var el = getEl(this, referenceEl);
-            referenceEl.appendChild(el);
-            return afterInsert(this, referenceEl);
-        },
-        prependTo: function(referenceEl) {
-            referenceEl = resolveEl(referenceEl);
-            var el = getEl(this, referenceEl);
-            referenceEl.insertBefore(el, referenceEl.firstChild || null);
-            return afterInsert(this, referenceEl);
-        },
-        replace: function(referenceEl) {
-            referenceEl = resolveEl(referenceEl);
-            var el = getEl(this, referenceEl);
-            beforeRemove(referenceEl);
-            referenceEl.parentNode.replaceChild(el, referenceEl);
-            return afterInsert(this, referenceEl);
-        },
-        replaceChildrenOf: function(referenceEl) {
-            referenceEl = resolveEl(referenceEl);
-            var el = getEl(this, referenceEl);
-
-            var curChild = referenceEl.firstChild;
-            while(curChild) {
-                var nextSibling = curChild.nextSibling; // Just in case the DOM changes while removing
-                if (curChild.nodeType === 1) {
-                    beforeRemove(curChild);
-                }
-                curChild = nextSibling;
-            }
-
-            referenceEl.innerHTML = '';
-            referenceEl.appendChild(el);
-            return afterInsert(this, referenceEl);
-        },
-        insertBefore: function(referenceEl) {
-            referenceEl = resolveEl(referenceEl);
-            var el = getEl(this, referenceEl);
-            referenceEl.parentNode.insertBefore(el, referenceEl);
-            return afterInsert(this, referenceEl);
-        },
-        insertAfter: function(referenceEl) {
-            referenceEl = resolveEl(referenceEl);
-            var el = getEl(this, referenceEl);
-            el = el;
-            var nextSibling = referenceEl.nextSibling;
-            var parentNode = referenceEl.parentNode;
-            if (nextSibling) {
-                parentNode.insertBefore(el, nextSibling);
-            } else {
-                parentNode.appendChild(el);
-            }
-            return afterInsert(this, referenceEl);
-        }
-    });
-};
-
-});
-$_mod.main("/marko$4.0.0-rc.18", "runtime/index");
-$_mod.remap("/marko$4.0.0-rc.18/runtime/env-init", false);
-$_mod.def("/marko$4.0.0-rc.18/runtime/createOut", function(require, exports, module, __filename, __dirname) { var actualCreateOut;
-
-function setCreateOut(createOutFunc) {
-    actualCreateOut = createOutFunc;
-}
-
-function createOut(globalData) {
-    return actualCreateOut(globalData);
-}
-
-createOut.$__setCreateOut = setCreateOut;
-
-module.exports = createOut;
-});
-$_mod.main("/marko$4.0.0-rc.18/runtime/loader", "");
-$_mod.remap("/marko$4.0.0-rc.18/runtime/loader/index", "/marko$4.0.0-rc.18/runtime/loader/index-browser");
-$_mod.remap("/marko$4.0.0-rc.18/runtime/loader/index-browser", "/marko$4.0.0-rc.18/runtime/loader/index-browser-dynamic");
-$_mod.def("/marko$4.0.0-rc.18/runtime/loader/index-browser-dynamic", function(require, exports, module, __filename, __dirname) { 'use strict';
-module.exports = function load(templatePath) {
-    // We make the assumption that the template path is a
-    // fully resolved module path and that the module exists
-    // as a CommonJS module
-    return require(templatePath);
-};
-});
-$_mod.def("/marko$4.0.0-rc.18/runtime/index", function(require, exports, module, __filename, __dirname) { 'use strict';
-{}/*require('./env-init');*/ // no-op in the browser, but enables extra features on the server
-
-exports.createOut = require('/marko$4.0.0-rc.18/runtime/createOut'/*'./createOut'*/);
-exports.load = require('/marko$4.0.0-rc.18/runtime/loader/index-browser-dynamic'/*'./loader'*/);
-exports.events = require('/marko$4.0.0-rc.18/runtime/events'/*'./events'*/);
-});
-$_mod.def("/marko$4.0.0-rc.18/runtime/RenderResult", function(require, exports, module, __filename, __dirname) { var domInsert = require('/marko$4.0.0-rc.18/runtime/dom-insert'/*'./dom-insert'*/);
-
-function checkAddedToDOM(result, method) {
-    if (!result.$__widgets) {
-        throw Error('Not added to DOM');
-    }
-}
-
-function getWidgetDefs(result) {
-    var widgetDefs = result.$__widgets;
-
-    if (widgetDefs.length === 0) {
-        throw Error('No widget');
-    }
-    return widgetDefs;
-}
-
-function RenderResult(out) {
-   this.out = this.$__out = out;
-   this.$__widgets = null;
-}
-
-module.exports = RenderResult;
-
-var proto = RenderResult.prototype = {
-    getWidget: function() {
-        checkAddedToDOM(this, 'getWidget');
-
-        var rerenderWidgetInfo = this.$__out.global.$w;
-        var rerenderWidget = rerenderWidgetInfo && rerenderWidgetInfo[0];
-        if (rerenderWidget) {
-            return rerenderWidget;
-        }
-
-        return getWidgetDefs(this)[0].$__widget;
-    },
-    getWidgets: function(selector) {
-        checkAddedToDOM(this, 'getWidgets');
-
-        var widgetDefs = getWidgetDefs(this);
-
-        var widgets = [];
-        var i;
-
-        for (i = 0; i < widgetDefs.length; i++) {
-            var widget = widgetDefs[i].$__widget;
-            if (!selector || selector(widget)) {
-                widgets.push(widget);
-            }
-        }
-
-        return widgets;
-    },
-
-    afterInsert: function(doc) {
-        var out = this.$__out;
-        var widgetsContext = out.global.widgets;
-        if (widgetsContext) {
-            this.$__widgets = widgetsContext.$__widgets;
-            widgetsContext.$__initWidgets(doc);
-        }
-
-        return this;
-    },
-    getNode: function(doc) {
-        return this.$__out.$__getNode(doc);
-    },
-    getOutput: function() {
-        return this.$__out.$__getOutput();
-    },
-    toString: function() {
-        return this.$__out.toString();
-    },
-    toJSON: function() {
-        return this.$__out.$__getOutput();
-    },
-    document: typeof document !== 'undefined' && document
-};
-
-// Add all of the following DOM methods to Widget.prototype:
-// - appendTo(referenceEl)
-// - replace(referenceEl)
-// - replaceChildrenOf(referenceEl)
-// - insertBefore(referenceEl)
-// - insertAfter(referenceEl)
-// - prependTo(referenceEl)
-domInsert(
-    proto,
-    function getEl(renderResult, referenceEl) {
-        return renderResult.getNode(referenceEl.ownerDocument);
-    },
-    function afterInsert(renderResult, referenceEl) {
-        return renderResult.afterInsert(referenceEl.ownerDocument);
-    });
-});
-$_mod.installed("marko$4.0.0-rc.18", "listener-tracker", "2.0.0");
-$_mod.main("/listener-tracker$2.0.0", "lib/listener-tracker");
-$_mod.def("/listener-tracker$2.0.0/lib/listener-tracker", function(require, exports, module, __filename, __dirname) { var INDEX_EVENT = 0;
-var INDEX_USER_LISTENER = 1;
-var INDEX_WRAPPED_LISTENER = 2;
-var DESTROY = "destroy";
-
-function isNonEventEmitter(target) {
-  return !target.once;
-}
-
-function EventEmitterWrapper(target) {
-    this.$__target = target;
-    this.$__listeners = [];
-    this.$__subscribeTo = null;
-}
-
-EventEmitterWrapper.prototype = {
-    $__remove: function(test, testWrapped) {
-        var target = this.$__target;
-        var listeners = this.$__listeners;
-
-        this.$__listeners = listeners.filter(function(curListener) {
-            var curEvent = curListener[INDEX_EVENT];
-            var curListenerFunc = curListener[INDEX_USER_LISTENER];
-            var curWrappedListenerFunc = curListener[INDEX_WRAPPED_LISTENER];
-
-            if (testWrapped) {
-                // If the user used `once` to attach an event listener then we had to
-                // wrap their listener function with a new function that does some extra
-                // cleanup to avoid a memory leak. If the `testWrapped` flag is set to true
-                // then we are attempting to remove based on a function that we had to
-                // wrap (not the user listener function)
-                if (curWrappedListenerFunc && test(curEvent, curWrappedListenerFunc)) {
-                    target.removeListener(curEvent, curWrappedListenerFunc);
-
-                    return false;
-                }
-            } else if (test(curEvent, curListenerFunc)) {
-                // If the listener function was wrapped due to it being a `once` listener
-                // then we should remove from the target EventEmitter using wrapped
-                // listener function. Otherwise, we remove the listener using the user-provided
-                // listener function.
-                target.removeListener(curEvent, curWrappedListenerFunc || curListenerFunc);
-
-                return false;
-            }
-
-            return true;
-        });
-
-        // Fixes https://github.com/raptorjs/listener-tracker/issues/2
-        // If all of the listeners stored with a wrapped EventEmitter
-        // have been removed then we should unregister the wrapped
-        // EventEmitter in the parent SubscriptionTracker
-        var subscribeTo = this.$__subscribeTo;
-
-        if (!this.$__listeners.length && subscribeTo) {
-            var self = this;
-            var subscribeToList = subscribeTo.$__subscribeToList;
-            subscribeTo.$__subscribeToList = subscribeToList.filter(function(cur) {
-                return cur !== self;
-            });
-        }
-    },
-
-    on: function(event, listener) {
-        this.$__target.on(event, listener);
-        this.$__listeners.push([event, listener]);
-        return this;
-    },
-
-    once: function(event, listener) {
-        var self = this;
-
-        // Handling a `once` event listener is a little tricky since we need to also
-        // do our own cleanup if the `once` event is emitted. Therefore, we need
-        // to wrap the user's listener function with our own listener function.
-        var wrappedListener = function() {
-            self.$__remove(function(event, listenerFunc) {
-                return wrappedListener === listenerFunc;
-            }, true /* We are removing the wrapped listener */);
-
-            listener.apply(this, arguments);
-        };
-
-        this.$__target.once(event, wrappedListener);
-        this.$__listeners.push([event, listener, wrappedListener]);
-        return this;
-    },
-
-    removeListener: function(event, listener) {
-        if (typeof event === 'function') {
-            listener = event;
-            event = null;
-        }
-
-        if (listener && event) {
-            this.$__remove(function(curEvent, curListener) {
-                return event === curEvent && listener === curListener;
-            });
-        } else if (listener) {
-            this.$__remove(function(curEvent, curListener) {
-                return listener === curListener;
-            });
-        } else if (event) {
-            this.removeAllListeners(event);
-        }
-
-        return this;
-    },
-
-    removeAllListeners: function(event) {
-
-        var listeners = this.$__listeners;
-        var target = this.$__target;
-
-        if (event) {
-            this.$__remove(function(curEvent, curListener) {
-                return event === curEvent;
-            });
-        } else {
-            for (var i = listeners.length - 1; i >= 0; i--) {
-                var cur = listeners[i];
-                target.removeListener(cur[INDEX_EVENT], cur[INDEX_USER_LISTENER]);
-            }
-            this.$__listeners.length = 0;
-        }
-
-        return this;
-    }
-};
-
-function EventEmitterAdapter(target) {
-    this.$__target = target;
-}
-
-EventEmitterAdapter.prototype = {
-    on: function(event, listener) {
-        this.$__target.addEventListener(event, listener);
-        return this;
-    },
-
-    once: function(event, listener) {
-        var self = this;
-
-        // need to save this so we can remove it below
-        var onceListener = function() {
-          self.$__target.removeEventListener(event, onceListener);
-          listener();
-        };
-        this.$__target.addEventListener(event, onceListener);
-        return this;
-    },
-
-    removeListener: function(event, listener) {
-        this.$__target.removeEventListener(event, listener);
-        return this;
-    }
-};
-
-function SubscriptionTracker() {
-    this.$__subscribeToList = [];
-}
-
-SubscriptionTracker.prototype = {
-
-    subscribeTo: function(target, options) {
-        var addDestroyListener = !options || options.addDestroyListener !== false;
-        var wrapper;
-        var nonEE;
-        var subscribeToList = this.$__subscribeToList;
-
-        for (var i=0, len=subscribeToList.length; i<len; i++) {
-            var cur = subscribeToList[i];
-            if (cur.$__target === target) {
-                wrapper = cur;
-                break;
-            }
-        }
-
-        if (!wrapper) {
-            if (isNonEventEmitter(target)) {
-              nonEE = new EventEmitterAdapter(target);
-            }
-
-            wrapper = new EventEmitterWrapper(nonEE || target);
-            if (addDestroyListener && !nonEE) {
-                wrapper.once(DESTROY, function() {
-                    wrapper.removeAllListeners();
-
-                    for (var i = subscribeToList.length - 1; i >= 0; i--) {
-                        if (subscribeToList[i].$__target === target) {
-                            subscribeToList.splice(i, 1);
-                            break;
-                        }
-                    }
-                });
-            }
-
-            // Store a reference to the parent SubscriptionTracker so that we can do cleanup
-            // if the EventEmitterWrapper instance becomes empty (i.e., no active listeners)
-            wrapper.$__subscribeTo = this;
-            subscribeToList.push(wrapper);
-        }
-
-        return wrapper;
-    },
-
-    removeAllListeners: function(target, event) {
-        var subscribeToList = this.$__subscribeToList;
-        var i;
-
-        if (target) {
-            for (i = subscribeToList.length - 1; i >= 0; i--) {
-                var cur = subscribeToList[i];
-                if (cur.$__target === target) {
-                    cur.removeAllListeners(event);
-
-                    if (!cur.$__listeners.length) {
-                        // Do some cleanup if we removed all
-                        // listeners for the target event emitter
-                        subscribeToList.splice(i, 1);
-                    }
-
-                    break;
-                }
-            }
-        } else {
-            for (i = subscribeToList.length - 1; i >= 0; i--) {
-                subscribeToList[i].removeAllListeners();
-            }
-            subscribeToList.length = 0;
-        }
-    }
-};
-
-exports = module.exports = SubscriptionTracker;
-
-exports.wrap = function(targetEventEmitter) {
-    var nonEE;
-    var wrapper;
-
-    if (isNonEventEmitter(targetEventEmitter)) {
-      nonEE = new EventEmitterAdapter(targetEventEmitter);
-    }
-
-    wrapper = new EventEmitterWrapper(nonEE || targetEventEmitter);
-    if (!nonEE) {
-      // we don't set this for non EE types
-      targetEventEmitter.once(DESTROY, function() {
-          wrapper.$__listeners.length = 0;
-      });
-    }
-
-    return wrapper;
-};
-
-exports.createTracker = function() {
-    return new SubscriptionTracker();
-};
-
-});
-$_mod.def("/raptor-util$3.1.0/inherit", function(require, exports, module, __filename, __dirname) { function inherit(ctor, superCtor, copyProps) {
-    var oldProto = ctor.prototype;
-    var newProto = ctor.prototype = Object.create(superCtor.prototype, {
-        constructor: {
-            value: ctor,
-            writable: true,
-            configurable: true
-        }
-    });
-    if (oldProto && copyProps !== false) {
-        var propertyNames = Object.getOwnPropertyNames(oldProto);
-        for (var i = 0; i < propertyNames.length; i++) {
-            var name = propertyNames[i];
-            var descriptor = Object.getOwnPropertyDescriptor(oldProto, name);
-            Object.defineProperty(newProto, name, descriptor);
-        }
-    }
-    ctor.$super = superCtor;
-    ctor.prototype = newProto;
-    return ctor;
-}
-
-
-module.exports = inherit;
-inherit._inherit = inherit;
-
-});
-$_mod.def("/marko$4.0.0-rc.18/widgets/update-manager", function(require, exports, module, __filename, __dirname) { 'use strict';
-
-var updatesScheduled = false;
-var batchStack = []; // A stack of batched updates
-var unbatchedQueue = []; // Used for scheduled batched updates
-
-var win = window;
-var setImmediate = win.setImmediate;
-
-if (!setImmediate) {
-    if (win.postMessage) {
-        var queue = [];
-        var messageName = 'si';
-        win.addEventListener('message', function (event) {
-            var source = event.source;
-            if (source == win || !source && event.data === messageName) {
-                event.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        setImmediate = function(fn) {
-            queue.push(fn);
-            win.postMessage(messageName, '*');
-        };
-    } else {
-        setImmediate = setTimeout;
-    }
-}
-
-/**
- * This function is called when we schedule the update of "unbatched"
- * updates to widgets.
- */
-function updateUnbatchedWidgets() {
-    if (unbatchedQueue.length) {
-        try {
-            updateWidgets(unbatchedQueue);
-        } finally {
-            // Reset the flag now that this scheduled batch update
-            // is complete so that we can later schedule another
-            // batched update if needed
-            updatesScheduled = false;
-        }
-    }
-}
-
-function scheduleUpdates() {
-    if (updatesScheduled) {
-        // We have already scheduled a batched update for the
-        // process.nextTick so nothing to do
-        return;
-    }
-
-    updatesScheduled = true;
-
-    setImmediate(updateUnbatchedWidgets);
-}
-
-function updateWidgets(queue) {
-    // Loop over the widgets in the queue and update them.
-    // NOTE: It is okay if the queue grows during the iteration
-    //       since we will still get to them at the end
-    for (var i=0; i<queue.length; i++) {
-        var widget = queue[i];
-        widget.update(); // Do the actual widget update
-    }
-
-    // Clear out the queue by setting the length to zero
-    queue.length = 0;
-}
-
-function batchUpdate(func) {
-    // If the batched update stack is empty then this
-    // is the outer batched update. After the outer
-    // batched update completes we invoke the "afterUpdate"
-    // event listeners.
-    var batch = {
-        $__queue: null
-    };
-
-    batchStack.push(batch);
-
-    try {
-        func();
-    } finally {
-        try {
-            // Update all of the widgets that where queued up
-            // in this batch (if any)
-            if (batch.$__queue) {
-                updateWidgets(batch.$__queue);
-            }
-        } finally {
-            // Now that we have completed the update of all the widgets
-            // in this batch we need to remove it off the top of the stack
-            batchStack.length--;
-        }
-    }
-}
-
-function queueWidgetUpdate(widget) {
-    var batchStackLen = batchStack.length;
-
-    if (batchStackLen) {
-        // When a batch update is started we push a new batch on to a stack.
-        // If the stack has a non-zero length then we know that a batch has
-        // been started so we can just queue the widget on the top batch. When
-        // the batch is ended this widget will be updated.
-        var batch = batchStack[batchStackLen-1];
-
-        // We default the batch queue to null to avoid creating an Array instance
-        // unnecessarily. If it is null then we create a new Array, otherwise
-        // we push it onto the existing Array queue
-        if (batch.$__queue) {
-            batch.$__queue.push(widget);
-        } else {
-            batch.$__queue = [widget];
-        }
-    } else {
-        // We are not within a batched update. We need to schedule a batch update
-        // for the process.nextTick (if that hasn't been done already) and we will
-        // add the widget to the unbatched queued
-        scheduleUpdates();
-        unbatchedQueue.push(widget);
-    }
-}
-
-exports.$__queueWidgetUpdate = queueWidgetUpdate;
-exports.$__batchUpdate = batchUpdate;
-});
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/VNode", function(require, exports, module, __filename, __dirname) { /* jshint newcap:false */
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/VNode", function(require, exports, module, __filename, __dirname) { /* jshint newcap:false */
 
 function assignNamespace(node, namespaceURI) {
     node.namespaceURI = namespaceURI;
@@ -2006,7 +887,123 @@ VNode.prototype = {
 module.exports = VNode;
 
 });
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/VElement", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.18/runtime/vdom/VNode'/*'./VNode'*/);
+$_mod.installed("marko$4.0.0-rc.23", "raptor-util", "3.1.0");
+$_mod.def("/raptor-util$3.1.0/inherit", function(require, exports, module, __filename, __dirname) { function inherit(ctor, superCtor, copyProps) {
+    var oldProto = ctor.prototype;
+    var newProto = ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+            value: ctor,
+            writable: true,
+            configurable: true
+        }
+    });
+    if (oldProto && copyProps !== false) {
+        var propertyNames = Object.getOwnPropertyNames(oldProto);
+        for (var i = 0; i < propertyNames.length; i++) {
+            var name = propertyNames[i];
+            var descriptor = Object.getOwnPropertyDescriptor(oldProto, name);
+            Object.defineProperty(newProto, name, descriptor);
+        }
+    }
+    ctor.$super = superCtor;
+    ctor.prototype = newProto;
+    return ctor;
+}
+
+
+module.exports = inherit;
+inherit._inherit = inherit;
+
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/VComment", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.23/runtime/vdom/VNode'/*'./VNode'*/);
+var inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
+
+function VComment(value) {
+    this.$__VNode(-1 /* no children */);
+    this.nodeValue = value;
+}
+
+VComment.prototype = {
+    nodeType: 8,
+
+    actualize: function(doc) {
+        return doc.createComment(this.nodeValue);
+    },
+
+    $__cloneNode: function() {
+        return new VComment(this.nodeValue);
+    }
+};
+
+inherit(VComment, VNode);
+
+module.exports = VComment;
+
+});
+$_mod.def("/raptor-util$3.1.0/extend", function(require, exports, module, __filename, __dirname) { module.exports = function extend(target, source) { //A simple function to copy properties from one object to another
+    if (!target) { //Check if a target was provided, otherwise create a new empty object to return
+        target = {};
+    }
+
+    if (source) {
+        for (var propName in source) {
+            if (source.hasOwnProperty(propName)) { //Only look at source properties that are not inherited
+                target[propName] = source[propName]; //Copy the property
+            }
+        }
+    }
+
+    return target;
+};
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/VDocumentFragment", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.23/runtime/vdom/VNode'/*'./VNode'*/);
+var inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
+var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
+
+function VDocumentFragmentClone(other) {
+    extend(this, other);
+    this.$__parentNode = undefined;
+    this.$__nextSibling = undefined;
+}
+
+function VDocumentFragment(documentFragment) {
+    this.$__VNode(null /* childCount */);
+    this.namespaceURI = undefined;
+}
+
+VDocumentFragment.prototype = {
+    nodeType: 11,
+
+    $__DocumentFragment: true,
+
+    $__nsAware: true,
+
+    $__cloneNode: function() {
+        return new VDocumentFragmentClone(this);
+    },
+
+    actualize: function(doc) {
+        var docFragment = doc.createDocumentFragment();
+
+        var curChild = this.firstChild;
+
+        while(curChild) {
+            docFragment.appendChild(curChild.actualize(doc));
+            curChild = curChild.nextSibling;
+        }
+
+        return docFragment;
+    }
+};
+
+inherit(VDocumentFragment, VNode);
+
+VDocumentFragmentClone.prototype = VDocumentFragment.prototype;
+
+module.exports = VDocumentFragment;
+
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/VElement", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.23/runtime/vdom/VNode'/*'./VNode'*/);
 var inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
 var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
 var defineProperty = Object.defineProperty;
@@ -2336,7 +1333,966 @@ VElement.$__morphAttrs = function(fromEl, toEl) {
 module.exports = VElement;
 
 });
-$_mod.installed("marko$4.0.0-rc.18", "morphdom", "2.3.1");
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/VText", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.23/runtime/vdom/VNode'/*'./VNode'*/);
+var inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
+
+function VText(value) {
+    this.$__VNode(-1 /* no children */);
+    this.nodeValue = value;
+}
+
+VText.prototype = {
+    $__Text: true,
+
+    nodeType: 3,
+
+    actualize: function(doc) {
+        return doc.createTextNode(this.nodeValue);
+    },
+
+    $__cloneNode: function() {
+        return new VText(this.nodeValue);
+    }
+};
+
+inherit(VText, VNode);
+
+module.exports = VText;
+
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/vdom", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.23/runtime/vdom/VNode'/*'./VNode'*/);
+var VComment = require('/marko$4.0.0-rc.23/runtime/vdom/VComment'/*'./VComment'*/);
+var VDocumentFragment = require('/marko$4.0.0-rc.23/runtime/vdom/VDocumentFragment'/*'./VDocumentFragment'*/);
+var VElement = require('/marko$4.0.0-rc.23/runtime/vdom/VElement'/*'./VElement'*/);
+var VText = require('/marko$4.0.0-rc.23/runtime/vdom/VText'/*'./VText'*/);
+var defaultDocument = typeof document != 'undefined' && document;
+
+var specialHtmlRegexp = /[&<]/;
+var range;
+
+function virtualizeChildNodes(node, vdomParent) {
+    var curChild = node.firstChild;
+    while(curChild) {
+        vdomParent.$__appendChild(virtualize(curChild));
+        curChild = curChild.nextSibling;
+    }
+}
+
+function virtualize(node) {
+    switch(node.nodeType) {
+        case 1:
+            var attributes = node.attributes;
+            var attrCount = attributes.length;
+
+            var attrs;
+
+            if (attrCount) {
+                attrs = {};
+
+                for (var i=0; i<attrCount; i++) {
+                    var attr = attributes[i];
+                    var attrName;
+
+                    if (attr.namespaceURI === 'http://www.w3.org/1999/xlink' && attr.localName === 'href') {
+                        attrName = 'xlink:href';
+                    } else {
+                        attrName = attr.name;
+                    }
+
+                    attrs[attrName] = attr.value;
+                }
+            }
+
+            var vdomEL = new VElement(node.nodeName, attrs);
+
+            if (vdomEL.$__isTextArea) {
+                vdomEL.$__value = node.value;
+            } else {
+                virtualizeChildNodes(node, vdomEL);
+            }
+
+            return vdomEL;
+        case 3:
+            return new VText(node.nodeValue);
+        case 8:
+            return new VComment(node.nodeValue);
+        case 11:
+            var vdomDocFragment = new VDocumentFragment();
+            virtualizeChildNodes(node, vdomDocFragment);
+            return vdomDocFragment;
+    }
+}
+
+function virtualizeHTML(html, doc) {
+    if (!specialHtmlRegexp.test(html)) {
+        return new VText(html);
+    }
+
+    if (!range && doc.createRange) {
+        range = doc.createRange();
+        range.selectNode(doc.body);
+    }
+
+    var vdomFragment;
+
+    var fragment;
+    if (range && range.createContextualFragment) {
+        fragment = range.createContextualFragment(html);
+        vdomFragment = virtualize(fragment);
+    } else {
+        var container = doc.createElement('body');
+        container.innerHTML = html;
+        vdomFragment = new VDocumentFragment();
+
+        var curChild = container.firstChild;
+        while(curChild) {
+            vdomFragment.$__appendChild(virtualize(curChild));
+            curChild = curChild.nextSibling;
+        }
+    }
+
+    return vdomFragment;
+}
+
+var Node_prototype = VNode.prototype;
+
+/**
+ * Shorthand method for creating and appending a Text node with a given value
+ * @param  {String} value The text value for the new Text node
+ */
+Node_prototype.t = function(value) {
+    var type = typeof value;
+    var vdomNode;
+
+    if (type !== 'string') {
+        if (value == null) {
+            value = '';
+        } else if (type === 'object') {
+            if (value.toHTML) {
+                vdomNode = virtualizeHTML(value.toHTML(), document);
+            }
+        }
+    }
+
+    this.$__appendChild(vdomNode || new VText(value.toString()));
+    return this.$__finishChild();
+};
+
+/**
+ * Shorthand method for creating and appending a Comment node with a given value
+ * @param  {String} value The value for the new Comment node
+ */
+Node_prototype.c = function(value) {
+    this.$__appendChild(new VComment(value));
+    return this.$__finishChild();
+};
+
+Node_prototype.$__appendDocumentFragment = function() {
+    return this.$__appendChild(new VDocumentFragment());
+};
+
+exports.$__VComment = VComment;
+exports.$__VDocumentFragment = VDocumentFragment;
+exports.$__VElement = VElement;
+exports.$__VText = VText;
+exports.$__virtualize = virtualize;
+exports.$__virtualizeHTML = virtualizeHTML;
+exports.$__defaultDocument = defaultDocument;
+
+});
+$_mod.remap("/marko$4.0.0-rc.23/components/util", "/marko$4.0.0-rc.23/components/util-browser");
+$_mod.remap("/marko$4.0.0-rc.23/components/init-components", "/marko$4.0.0-rc.23/components/init-components-browser");
+$_mod.installed("marko$4.0.0-rc.23", "warp10", "1.3.3");
+$_mod.def("/warp10$1.3.3/src/finalize", function(require, exports, module, __filename, __dirname) { var isArray = Array.isArray;
+
+function resolve(object, path, len) {
+    var current = object;
+    for (var i=0; i<len; i++) {
+        current = current[path[i]];
+    }
+
+    return current;
+}
+
+function resolveType(info) {
+    if (info.type === 'Date') {
+        return new Date(info.value);
+    } else {
+        throw new Error('Bad type');
+    }
+}
+
+module.exports = function finalize(outer) {
+    if (!outer) {
+        return outer;
+    }
+
+    var assignments = outer.$$;
+    if (assignments) {
+        var object = outer.o;
+        var len;
+
+        if (assignments && (len=assignments.length)) {
+            for (var i=0; i<len; i++) {
+                var assignment = assignments[i];
+
+                var rhs = assignment.r;
+                var rhsValue;
+
+                if (isArray(rhs)) {
+                    rhsValue = resolve(object, rhs, rhs.length);
+                } else {
+                    rhsValue = resolveType(rhs);
+                }
+
+                var lhs = assignment.l;
+                var lhsLast = lhs.length-1;
+
+                if (lhsLast === -1) {
+                    object = outer.o = rhsValue;
+                    break;
+                } else {
+                    var lhsParent = resolve(object, lhs, lhsLast);
+                    lhsParent[lhs[lhsLast]] = rhsValue;
+                }
+            }
+        }
+
+        assignments.length = 0; // Assignments have been applied, do not reapply
+
+        return object == null ? null : object;
+    } else {
+        return outer;
+    }
+
+};
+});
+$_mod.def("/warp10$1.3.3/finalize", function(require, exports, module, __filename, __dirname) { module.exports = require('/warp10$1.3.3/src/finalize'/*'./src/finalize'*/);
+});
+$_mod.def("/marko$4.0.0-rc.23/components/bubble", function(require, exports, module, __filename, __dirname) { module.exports = [
+    /* Mouse Events */
+    'click',
+    'dblclick',
+    'mousedown',
+    'mouseup',
+    // 'mouseover',
+    // 'mousemove',
+    // 'mouseout',
+    'dragstart',
+    'drag',
+    // 'dragenter',
+    // 'dragleave',
+    // 'dragover',
+    'drop',
+    'dragend',
+
+    /* Keyboard Events */
+    'keydown',
+    'keypress',
+    'keyup',
+
+    /* Form Events */
+    'select',
+    'change',
+    'submit',
+    'reset',
+    'input',
+
+    'attach', // Pseudo event supported by Marko
+    'detach'  // Pseudo event supported by Marko
+
+    // 'focus', <-- Does not bubble
+    // 'blur', <-- Does not bubble
+    // 'focusin', <-- Not supported in all browsers
+    // 'focusout' <-- Not supported in all browsers
+];
+});
+$_mod.def("/marko$4.0.0-rc.23/components/event-delegation", function(require, exports, module, __filename, __dirname) { var componentsUtil = require('/marko$4.0.0-rc.23/components/util-browser'/*'./util'*/);
+var runtimeId = componentsUtil.$__runtimeId;
+var componentLookup = componentsUtil.$__componentLookup;
+var isArray = Array.isArray;
+
+// We make our best effort to allow multiple marko runtimes to be loaded in the
+// same window. Each marko runtime will get its own unique runtime ID.
+var listenersAttachedKey = '$MED' + runtimeId;
+
+function getEventAttribute(el, attrName) {
+    var virtualAttrs = el._vattrs;
+
+    if (virtualAttrs) {
+        return virtualAttrs[attrName];
+    } else {
+        var attrValue = el.getAttribute(attrName);
+        if (attrValue) {
+            // <method_name> <component_id>[ <extra_args_index]
+            var parts = attrValue.split(' ');
+            if (parts.length == 3) {
+                parts[2] = parseInt(parts[2], 10);
+            }
+
+            return parts;
+        }
+    }
+}
+
+function delegateEvent(node, target, event) {
+    var targetMethod = target[0];
+    var targetComponentId = target[1];
+    var extraArgs = target[2];
+
+    var targetComponent = componentLookup[targetComponentId];
+
+    if (!targetComponent) {
+        return;
+    }
+
+    var targetFunc = targetComponent[targetMethod];
+    if (!targetFunc) {
+        throw Error('Method not found: ' + targetMethod);
+    }
+
+    if (extraArgs != null) {
+        if (typeof extraArgs === 'number') {
+            extraArgs = targetComponent.$__bubblingDomEvents[extraArgs];
+            if (!isArray(extraArgs)) {
+                extraArgs = [extraArgs];
+            }
+        }
+    }
+
+    // Invoke the component method
+    if (extraArgs) {
+        targetFunc.apply(targetComponent, extraArgs.concat(event, node));
+    } else {
+        targetFunc.call(targetComponent, event, node);
+    }
+}
+
+function attachBubbleEventListeners(doc) {
+    var body = doc.body;
+    // Here's where we handle event delegation using our own mechanism
+    // for delegating events. For each event that we have white-listed
+    // as supporting bubble, we will attach a listener to the root
+    // document.body element. When we get notified of a triggered event,
+    // we again walk up the tree starting at the target associated
+    // with the event to find any mappings for event. Each mapping
+    // is from a DOM event type to a method of a component.
+    require('/marko$4.0.0-rc.23/components/bubble'/*'./bubble'*/).forEach(function addBubbleHandler(eventType) {
+        body.addEventListener(eventType, function(event) {
+            var propagationStopped = false;
+
+            // Monkey-patch to fix #97
+            var oldStopPropagation = event.stopPropagation;
+
+            event.stopPropagation = function() {
+                oldStopPropagation.call(event);
+                propagationStopped = true;
+            };
+
+            var curNode = event.target;
+            if (!curNode) {
+                return;
+            }
+
+            // Search up the tree looking DOM events mapped to target
+            // component methods
+            var attrName = 'data-_on' + eventType;
+            var target;
+
+            // Attributes will have the following form:
+            // on<event_type>("<target_method>|<component_id>")
+
+            do {
+                if ((target = getEventAttribute(curNode, attrName))) {
+                    delegateEvent(curNode, target, event);
+
+                    if (propagationStopped) {
+                        break;
+                    }
+                }
+            } while((curNode = curNode.parentNode) && curNode.getAttribute);
+        });
+    });
+}
+
+function noop() {}
+
+exports.$__handleNodeAttach = noop;
+exports.$__handleNodeDetach = noop;
+exports.$__delegateEvent = delegateEvent;
+exports.$__getEventAttribute = getEventAttribute;
+
+exports.$__init = function(doc) {
+    if (!doc[listenersAttachedKey]) {
+        doc[listenersAttachedKey] = true;
+        attachBubbleEventListeners(doc);
+    }
+};
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/events", function(require, exports, module, __filename, __dirname) { var EventEmitter = require('/events-light$1.0.5/src/index'/*'events-light'*/);
+module.exports = new EventEmitter();
+});
+$_mod.def("/marko$4.0.0-rc.23/components/nextRepeatedId", function(require, exports, module, __filename, __dirname) { var REPEATED_ID_KEY = '$rep';
+
+module.exports = function nextRepeatedId(out, parentId, id) {
+    var nextIdLookup = out.global[REPEATED_ID_KEY] || (out.global[REPEATED_ID_KEY] = {});
+
+    var indexLookupKey = parentId + '-' + id;
+    var currentIndex = nextIdLookup[indexLookupKey];
+    if (currentIndex == null) {
+        currentIndex = nextIdLookup[indexLookupKey] = 0;
+    } else {
+        currentIndex = ++nextIdLookup[indexLookupKey];
+    }
+
+    return indexLookupKey.slice(0, -2) + '[' + currentIndex + ']';
+};
+
+});
+$_mod.remap("/marko$4.0.0-rc.23/components/registry", "/marko$4.0.0-rc.23/components/registry-browser");
+$_mod.remap("/marko$4.0.0-rc.23/components/loadComponent", "/marko$4.0.0-rc.23/components/loadComponent-dynamic");
+$_mod.def("/marko$4.0.0-rc.23/components/loadComponent-dynamic", function(require, exports, module, __filename, __dirname) { 'use strict';
+
+module.exports = function load(typeName) {
+    // We make the assumption that the component type name is a path to a
+    // fully resolved module path and that the module exists
+    // as a CommonJS module
+    return require(typeName);
+};
+});
+$_mod.def("/marko$4.0.0-rc.23/components/State", function(require, exports, module, __filename, __dirname) { var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
+
+function ensure(state, propertyName) {
+    var proto = state.constructor.prototype;
+    if (!(propertyName in proto)) {
+        Object.defineProperty(proto, propertyName, {
+            get: function() {
+                return this.$__raw[propertyName];
+            },
+            set: function(value) {
+                this.$__set(propertyName, value, false /* ensure:false */);
+            }
+        });
+    }
+}
+
+function State(component, initialState) {
+    this.$__component = component;
+    this.$__raw = initialState || {};
+
+    this.$__dirty = false;
+    this.$__old = null;
+    this.$__changes = null;
+    this.$__forced = null; // An object that we use to keep tracking of state properties that were forced to be dirty
+
+    if (initialState) {
+        for(var key in initialState) {
+            ensure(this, key);
+        }
+    }
+
+    Object.seal(this);
+}
+
+State.prototype = {
+    $__reset: function() {
+        var self = this;
+
+        self.$__dirty = false;
+        self.$__old = null;
+        self.$__changes = null;
+        self.$__forced = null;
+    },
+
+    $__replace: function(newState) {
+        var state = this;
+        var key;
+
+        var rawState = this.$__raw;
+
+        for (key in rawState) {
+            if (!(key in newState)) {
+                state.$__set(key, undefined, false /* ensure:false */, false /* forceDirty:false */);
+            }
+        }
+
+        for (key in newState) {
+            state.$__set(key, newState[key], true /* ensure:true */, false /* forceDirty:false */);
+        }
+    },
+    $__set: function(name, value, shouldEnsure, forceDirty) {
+        var rawState = this.$__raw;
+
+        if (shouldEnsure) {
+            ensure(this, name);
+        }
+
+        if (forceDirty) {
+            var forcedDirtyState = this.$__forced || (this.$__forced = {});
+            forcedDirtyState[name] = true;
+        } else if (rawState[name] === value) {
+            return;
+        }
+
+        if (!this.$__dirty) {
+            // This is the first time we are modifying the component state
+            // so introduce some properties to do some tracking of
+            // changes to the state
+            this.$__dirty = true; // Mark the component state as dirty (i.e. modified)
+            this.$__old = rawState;
+            this.$__raw = rawState = extend({}, rawState);
+            this.$__changes = {};
+            this.$__component.$__queueUpdate();
+        }
+
+        this.$__changes[name] = value;
+
+        if (value === undefined) {
+            // Don't store state properties with an undefined or null value
+            delete rawState[name];
+        } else {
+            // Otherwise, store the new value in the component state
+            rawState[name] = value;
+        }
+    },
+    toJSON: function() {
+        return this.$__raw;
+    }
+};
+
+module.exports = State;
+});
+$_mod.main("/marko$4.0.0-rc.23", "runtime/index");
+$_mod.remap("/marko$4.0.0-rc.23/runtime/env-init", false);
+$_mod.def("/marko$4.0.0-rc.23/runtime/createOut", function(require, exports, module, __filename, __dirname) { var actualCreateOut;
+
+function setCreateOut(createOutFunc) {
+    actualCreateOut = createOutFunc;
+}
+
+function createOut(globalData) {
+    return actualCreateOut(globalData);
+}
+
+createOut.$__setCreateOut = setCreateOut;
+
+module.exports = createOut;
+});
+$_mod.main("/marko$4.0.0-rc.23/runtime/loader", "");
+$_mod.remap("/marko$4.0.0-rc.23/runtime/loader/index", "/marko$4.0.0-rc.23/runtime/loader/index-browser");
+$_mod.remap("/marko$4.0.0-rc.23/runtime/loader/index-browser", "/marko$4.0.0-rc.23/runtime/loader/index-browser-dynamic");
+$_mod.def("/marko$4.0.0-rc.23/runtime/loader/index-browser-dynamic", function(require, exports, module, __filename, __dirname) { 'use strict';
+module.exports = function load(templatePath) {
+    // We make the assumption that the template path is a
+    // fully resolved module path and that the module exists
+    // as a CommonJS module
+    return require(templatePath);
+};
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/index", function(require, exports, module, __filename, __dirname) { 'use strict';
+{}/*require('./env-init');*/ // no-op in the browser, but enables extra features on the server
+
+exports.createOut = require('/marko$4.0.0-rc.23/runtime/createOut'/*'./createOut'*/);
+exports.load = require('/marko$4.0.0-rc.23/runtime/loader/index-browser-dynamic'/*'./loader'*/);
+exports.events = require('/marko$4.0.0-rc.23/runtime/events'/*'./events'*/);
+});
+$_mod.installed("marko$4.0.0-rc.23", "listener-tracker", "2.0.0");
+$_mod.main("/listener-tracker$2.0.0", "lib/listener-tracker");
+$_mod.def("/listener-tracker$2.0.0/lib/listener-tracker", function(require, exports, module, __filename, __dirname) { var INDEX_EVENT = 0;
+var INDEX_USER_LISTENER = 1;
+var INDEX_WRAPPED_LISTENER = 2;
+var DESTROY = "destroy";
+
+function isNonEventEmitter(target) {
+  return !target.once;
+}
+
+function EventEmitterWrapper(target) {
+    this.$__target = target;
+    this.$__listeners = [];
+    this.$__subscribeTo = null;
+}
+
+EventEmitterWrapper.prototype = {
+    $__remove: function(test, testWrapped) {
+        var target = this.$__target;
+        var listeners = this.$__listeners;
+
+        this.$__listeners = listeners.filter(function(curListener) {
+            var curEvent = curListener[INDEX_EVENT];
+            var curListenerFunc = curListener[INDEX_USER_LISTENER];
+            var curWrappedListenerFunc = curListener[INDEX_WRAPPED_LISTENER];
+
+            if (testWrapped) {
+                // If the user used `once` to attach an event listener then we had to
+                // wrap their listener function with a new function that does some extra
+                // cleanup to avoid a memory leak. If the `testWrapped` flag is set to true
+                // then we are attempting to remove based on a function that we had to
+                // wrap (not the user listener function)
+                if (curWrappedListenerFunc && test(curEvent, curWrappedListenerFunc)) {
+                    target.removeListener(curEvent, curWrappedListenerFunc);
+
+                    return false;
+                }
+            } else if (test(curEvent, curListenerFunc)) {
+                // If the listener function was wrapped due to it being a `once` listener
+                // then we should remove from the target EventEmitter using wrapped
+                // listener function. Otherwise, we remove the listener using the user-provided
+                // listener function.
+                target.removeListener(curEvent, curWrappedListenerFunc || curListenerFunc);
+
+                return false;
+            }
+
+            return true;
+        });
+
+        // Fixes https://github.com/raptorjs/listener-tracker/issues/2
+        // If all of the listeners stored with a wrapped EventEmitter
+        // have been removed then we should unregister the wrapped
+        // EventEmitter in the parent SubscriptionTracker
+        var subscribeTo = this.$__subscribeTo;
+
+        if (!this.$__listeners.length && subscribeTo) {
+            var self = this;
+            var subscribeToList = subscribeTo.$__subscribeToList;
+            subscribeTo.$__subscribeToList = subscribeToList.filter(function(cur) {
+                return cur !== self;
+            });
+        }
+    },
+
+    on: function(event, listener) {
+        this.$__target.on(event, listener);
+        this.$__listeners.push([event, listener]);
+        return this;
+    },
+
+    once: function(event, listener) {
+        var self = this;
+
+        // Handling a `once` event listener is a little tricky since we need to also
+        // do our own cleanup if the `once` event is emitted. Therefore, we need
+        // to wrap the user's listener function with our own listener function.
+        var wrappedListener = function() {
+            self.$__remove(function(event, listenerFunc) {
+                return wrappedListener === listenerFunc;
+            }, true /* We are removing the wrapped listener */);
+
+            listener.apply(this, arguments);
+        };
+
+        this.$__target.once(event, wrappedListener);
+        this.$__listeners.push([event, listener, wrappedListener]);
+        return this;
+    },
+
+    removeListener: function(event, listener) {
+        if (typeof event === 'function') {
+            listener = event;
+            event = null;
+        }
+
+        if (listener && event) {
+            this.$__remove(function(curEvent, curListener) {
+                return event === curEvent && listener === curListener;
+            });
+        } else if (listener) {
+            this.$__remove(function(curEvent, curListener) {
+                return listener === curListener;
+            });
+        } else if (event) {
+            this.removeAllListeners(event);
+        }
+
+        return this;
+    },
+
+    removeAllListeners: function(event) {
+
+        var listeners = this.$__listeners;
+        var target = this.$__target;
+
+        if (event) {
+            this.$__remove(function(curEvent, curListener) {
+                return event === curEvent;
+            });
+        } else {
+            for (var i = listeners.length - 1; i >= 0; i--) {
+                var cur = listeners[i];
+                target.removeListener(cur[INDEX_EVENT], cur[INDEX_USER_LISTENER]);
+            }
+            this.$__listeners.length = 0;
+        }
+
+        return this;
+    }
+};
+
+function EventEmitterAdapter(target) {
+    this.$__target = target;
+}
+
+EventEmitterAdapter.prototype = {
+    on: function(event, listener) {
+        this.$__target.addEventListener(event, listener);
+        return this;
+    },
+
+    once: function(event, listener) {
+        var self = this;
+
+        // need to save this so we can remove it below
+        var onceListener = function() {
+          self.$__target.removeEventListener(event, onceListener);
+          listener();
+        };
+        this.$__target.addEventListener(event, onceListener);
+        return this;
+    },
+
+    removeListener: function(event, listener) {
+        this.$__target.removeEventListener(event, listener);
+        return this;
+    }
+};
+
+function SubscriptionTracker() {
+    this.$__subscribeToList = [];
+}
+
+SubscriptionTracker.prototype = {
+
+    subscribeTo: function(target, options) {
+        var addDestroyListener = !options || options.addDestroyListener !== false;
+        var wrapper;
+        var nonEE;
+        var subscribeToList = this.$__subscribeToList;
+
+        for (var i=0, len=subscribeToList.length; i<len; i++) {
+            var cur = subscribeToList[i];
+            if (cur.$__target === target) {
+                wrapper = cur;
+                break;
+            }
+        }
+
+        if (!wrapper) {
+            if (isNonEventEmitter(target)) {
+              nonEE = new EventEmitterAdapter(target);
+            }
+
+            wrapper = new EventEmitterWrapper(nonEE || target);
+            if (addDestroyListener && !nonEE) {
+                wrapper.once(DESTROY, function() {
+                    wrapper.removeAllListeners();
+
+                    for (var i = subscribeToList.length - 1; i >= 0; i--) {
+                        if (subscribeToList[i].$__target === target) {
+                            subscribeToList.splice(i, 1);
+                            break;
+                        }
+                    }
+                });
+            }
+
+            // Store a reference to the parent SubscriptionTracker so that we can do cleanup
+            // if the EventEmitterWrapper instance becomes empty (i.e., no active listeners)
+            wrapper.$__subscribeTo = this;
+            subscribeToList.push(wrapper);
+        }
+
+        return wrapper;
+    },
+
+    removeAllListeners: function(target, event) {
+        var subscribeToList = this.$__subscribeToList;
+        var i;
+
+        if (target) {
+            for (i = subscribeToList.length - 1; i >= 0; i--) {
+                var cur = subscribeToList[i];
+                if (cur.$__target === target) {
+                    cur.removeAllListeners(event);
+
+                    if (!cur.$__listeners.length) {
+                        // Do some cleanup if we removed all
+                        // listeners for the target event emitter
+                        subscribeToList.splice(i, 1);
+                    }
+
+                    break;
+                }
+            }
+        } else {
+            for (i = subscribeToList.length - 1; i >= 0; i--) {
+                subscribeToList[i].removeAllListeners();
+            }
+            subscribeToList.length = 0;
+        }
+    }
+};
+
+exports = module.exports = SubscriptionTracker;
+
+exports.wrap = function(targetEventEmitter) {
+    var nonEE;
+    var wrapper;
+
+    if (isNonEventEmitter(targetEventEmitter)) {
+      nonEE = new EventEmitterAdapter(targetEventEmitter);
+    }
+
+    wrapper = new EventEmitterWrapper(nonEE || targetEventEmitter);
+    if (!nonEE) {
+      // we don't set this for non EE types
+      targetEventEmitter.once(DESTROY, function() {
+          wrapper.$__listeners.length = 0;
+      });
+    }
+
+    return wrapper;
+};
+
+exports.createTracker = function() {
+    return new SubscriptionTracker();
+};
+
+});
+$_mod.def("/marko$4.0.0-rc.23/components/update-manager", function(require, exports, module, __filename, __dirname) { 'use strict';
+
+var updatesScheduled = false;
+var batchStack = []; // A stack of batched updates
+var unbatchedQueue = []; // Used for scheduled batched updates
+
+var win = window;
+var setImmediate = win.setImmediate;
+
+if (!setImmediate) {
+    if (win.postMessage) {
+        var queue = [];
+        var messageName = 'si';
+        win.addEventListener('message', function (event) {
+            var source = event.source;
+            if (source == win || !source && event.data === messageName) {
+                event.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        setImmediate = function(fn) {
+            queue.push(fn);
+            win.postMessage(messageName, '*');
+        };
+    } else {
+        setImmediate = setTimeout;
+    }
+}
+
+/**
+ * This function is called when we schedule the update of "unbatched"
+ * updates to components.
+ */
+function updateUnbatchedComponents() {
+    if (unbatchedQueue.length) {
+        try {
+            updateComponents(unbatchedQueue);
+        } finally {
+            // Reset the flag now that this scheduled batch update
+            // is complete so that we can later schedule another
+            // batched update if needed
+            updatesScheduled = false;
+        }
+    }
+}
+
+function scheduleUpdates() {
+    if (updatesScheduled) {
+        // We have already scheduled a batched update for the
+        // process.nextTick so nothing to do
+        return;
+    }
+
+    updatesScheduled = true;
+
+    setImmediate(updateUnbatchedComponents);
+}
+
+function updateComponents(queue) {
+    // Loop over the components in the queue and update them.
+    // NOTE: It is okay if the queue grows during the iteration
+    //       since we will still get to them at the end
+    for (var i=0; i<queue.length; i++) {
+        var component = queue[i];
+        component.$__update(); // Do the actual component update
+    }
+
+    // Clear out the queue by setting the length to zero
+    queue.length = 0;
+}
+
+function batchUpdate(func) {
+    // If the batched update stack is empty then this
+    // is the outer batched update. After the outer
+    // batched update completes we invoke the "afterUpdate"
+    // event listeners.
+    var batch = {
+        $__queue: null
+    };
+
+    batchStack.push(batch);
+
+    try {
+        func();
+    } finally {
+        try {
+            // Update all of the components that where queued up
+            // in this batch (if any)
+            if (batch.$__queue) {
+                updateComponents(batch.$__queue);
+            }
+        } finally {
+            // Now that we have completed the update of all the components
+            // in this batch we need to remove it off the top of the stack
+            batchStack.length--;
+        }
+    }
+}
+
+function queueComponentUpdate(component) {
+    var batchStackLen = batchStack.length;
+
+    if (batchStackLen) {
+        // When a batch update is started we push a new batch on to a stack.
+        // If the stack has a non-zero length then we know that a batch has
+        // been started so we can just queue the component on the top batch. When
+        // the batch is ended this component will be updated.
+        var batch = batchStack[batchStackLen-1];
+
+        // We default the batch queue to null to avoid creating an Array instance
+        // unnecessarily. If it is null then we create a new Array, otherwise
+        // we push it onto the existing Array queue
+        if (batch.$__queue) {
+            batch.$__queue.push(component);
+        } else {
+            batch.$__queue = [component];
+        }
+    } else {
+        // We are not within a batched update. We need to schedule a batch update
+        // for the process.nextTick (if that hasn't been done already) and we will
+        // add the component to the unbatched queued
+        scheduleUpdates();
+        unbatchedQueue.push(component);
+    }
+}
+
+exports.$__queueComponentUpdate = queueComponentUpdate;
+exports.$__batchUpdate = batchUpdate;
+});
+$_mod.installed("marko$4.0.0-rc.23", "morphdom", "2.3.1");
 $_mod.def("/morphdom$2.3.1/dist/morphdom-factory", function(require, exports, module, __filename, __dirname) { 'use strict';
 
 var range; // Create a range object for efficently rendering strings to elements.
@@ -2956,34 +2912,34 @@ module.exports = morphdomFactory;
 });
 $_mod.def("/morphdom$2.3.1/factory", function(require, exports, module, __filename, __dirname) { module.exports = require('/morphdom$2.3.1/dist/morphdom-factory'/*'./dist/morphdom-factory'*/);
 });
-$_mod.def("/marko$4.0.0-rc.18/widgets/Widget", function(require, exports, module, __filename, __dirname) { 'use strict';
+$_mod.def("/marko$4.0.0-rc.23/components/Component", function(require, exports, module, __filename, __dirname) { 'use strict';
 /* jshint newcap:false */
 
-var domInsert = require('/marko$4.0.0-rc.18/runtime/dom-insert'/*'../runtime/dom-insert'*/);
-var marko = require('/marko$4.0.0-rc.18/runtime/index'/*'../'*/);
-var widgetsUtil = require('/marko$4.0.0-rc.18/widgets/util-browser'/*'./util'*/);
-var getWidgetForEl = widgetsUtil.$__getWidgetForEl;
-var widgetLookup = widgetsUtil.$__widgetLookup;
-var emitLifecycleEvent = widgetsUtil.$__emitLifecycleEvent;
-var destroyWidgetForEl = widgetsUtil.$__destroyWidgetForEl;
-var destroyElRecursive = widgetsUtil.$__destroyElRecursive;
-var getElementById = widgetsUtil.$__getElementById;
+var domInsert = require('/marko$4.0.0-rc.23/runtime/dom-insert'/*'../runtime/dom-insert'*/);
+var marko = require('/marko$4.0.0-rc.23/runtime/index'/*'../'*/);
+var componentsUtil = require('/marko$4.0.0-rc.23/components/util-browser'/*'./util'*/);
+var getComponentForEl = componentsUtil.$__getComponentForEl;
+var componentLookup = componentsUtil.$__componentLookup;
+var emitLifecycleEvent = componentsUtil.$__emitLifecycleEvent;
+var destroyComponentForEl = componentsUtil.$__destroyComponentForEl;
+var destroyElRecursive = componentsUtil.$__destroyElRecursive;
+var getElementById = componentsUtil.$__getElementById;
 var EventEmitter = require('/events-light$1.0.5/src/index'/*'events-light'*/);
-var RenderResult = require('/marko$4.0.0-rc.18/runtime/RenderResult'/*'../runtime/RenderResult'*/);
+var RenderResult = require('/marko$4.0.0-rc.23/runtime/RenderResult'/*'../runtime/RenderResult'*/);
 var SubscriptionTracker = require('/listener-tracker$2.0.0/lib/listener-tracker'/*'listener-tracker'*/);
 var inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
-var updateManager = require('/marko$4.0.0-rc.18/widgets/update-manager'/*'./update-manager'*/);
-var morphAttrs = require('/marko$4.0.0-rc.18/runtime/vdom/VElement'/*'../runtime/vdom/VElement'*/).$__morphAttrs;
+var updateManager = require('/marko$4.0.0-rc.23/components/update-manager'/*'./update-manager'*/);
+var morphAttrs = require('/marko$4.0.0-rc.23/runtime/vdom/VElement'/*'../runtime/vdom/VElement'*/).$__morphAttrs;
 var morphdomFactory = require('/morphdom$2.3.1/factory'/*'morphdom/factory'*/);
 var morphdom = morphdomFactory(morphAttrs);
-var eventDelegation = require('/marko$4.0.0-rc.18/widgets/event-delegation'/*'./event-delegation'*/);
+var eventDelegation = require('/marko$4.0.0-rc.23/components/event-delegation'/*'./event-delegation'*/);
 
 var slice = Array.prototype.slice;
 
 var MORPHDOM_SKIP = false;
 
-var WIDGET_SUBSCRIBE_TO_OPTIONS;
-var NON_WIDGET_SUBSCRIBE_TO_OPTIONS = {
+var COMPONENT_SUBSCRIBE_TO_OPTIONS;
+var NON_COMPONENT_SUBSCRIBE_TO_OPTIONS = {
     addDestroyListener: false
 };
 
@@ -2993,34 +2949,34 @@ function removeListener(removeEventListenerHandle) {
     removeEventListenerHandle();
 }
 
-function hasCompatibleWidget(widgetsContext, existingWidget) {
-    var id = existingWidget.id;
-    var newWidgetDef = widgetsContext.$__widgetsById[id];
-    return newWidgetDef && existingWidget.$__type == newWidgetDef.$__widget.$__type;
+function hasCompatibleComponent(componentsContext, existingComponent) {
+    var id = existingComponent.id;
+    var newComponentDef = componentsContext.$__componentsById[id];
+    return newComponentDef && existingComponent.$__type == newComponentDef.$__component.$__type;
 }
 
-function handleCustomEventWithMethodListener(widget, targetMethodName, args, extraArgs) {
+function handleCustomEventWithMethodListener(component, targetMethodName, args, extraArgs) {
     // Remove the "eventType" argument
-    args.push(widget);
+    args.push(component);
 
     if (extraArgs) {
         args = extraArgs.concat(args);
     }
 
 
-    var targetWidget = widgetLookup[widget.$__scope];
-    var targetMethod = targetWidget[targetMethodName];
+    var targetComponent = componentLookup[component.$__scope];
+    var targetMethod = targetComponent[targetMethodName];
     if (!targetMethod) {
         throw Error('Method not found: ' + targetMethodName);
     }
 
-    targetMethod.apply(targetWidget, args);
+    targetMethod.apply(targetComponent, args);
 }
 
-function getElIdHelper(widget, widgetElId, index) {
-    var id = widget.id;
+function getElIdHelper(component, componentElId, index) {
+    var id = component.id;
 
-    var elId = widgetElId != null ? id + '-' + widgetElId : id;
+    var elId = componentElId != null ? id + '-' + componentElId : id;
 
     if (index != null) {
         elId += '[' + index + ']';
@@ -3036,7 +2992,7 @@ function getElIdHelper(widget, widgetElId, index) {
  * looping over and invoking the custom update handlers.
  * @return {boolean} Returns true if if the DOM was updated. False, otherwise.
  */
-function processUpdateHandlers(widget, stateChanges, oldState) {
+function processUpdateHandlers(component, stateChanges, oldState) {
     var handlerMethod;
     var handlers;
 
@@ -3044,7 +3000,7 @@ function processUpdateHandlers(widget, stateChanges, oldState) {
         if (stateChanges.hasOwnProperty(propName)) {
             var handlerMethodName = 'update_' + propName;
 
-            handlerMethod = widget[handlerMethodName];
+            handlerMethod = component[handlerMethodName];
             if (handlerMethod) {
                 (handlers || (handlers=[])).push([propName, handlerMethod]);
             } else {
@@ -3062,25 +3018,24 @@ function processUpdateHandlers(widget, stateChanges, oldState) {
         // Otherwise, there are handlers for all of the changed properties
         // so apply the updates using those handlers
 
-        for (var i=0, len=handlers.length; i<len; i++) {
-            var handler = handlers[i];
+        handlers.forEach(function(handler, i) {
             var propertyName = handler[0];
             handlerMethod = handler[1];
 
             var newValue = stateChanges[propertyName];
             var oldValue = oldState[propertyName];
-            handlerMethod.call(widget, newValue, oldValue);
-        }
+            handlerMethod.call(component, newValue, oldValue);
+        });
 
-        emitLifecycleEvent(widget, 'update');
+        emitLifecycleEvent(component, 'update');
 
-        widget.$__reset();
+        component.$__reset();
     }
 
     return true;
 }
 
-function checkInputChanged(existingWidget, oldInput, newInput) {
+function checkInputChanged(existingComponent, oldInput, newInput) {
     if (oldInput != newInput) {
         if (oldInput == null || newInput == null) {
             return true;
@@ -3106,7 +3061,7 @@ function checkInputChanged(existingWidget, oldInput, newInput) {
 
 function handleNodeDiscarded(node) {
     if (node.nodeType == 1) {
-        destroyWidgetForEl(node);
+        destroyComponentForEl(node);
     }
 }
 
@@ -3114,14 +3069,14 @@ function handleBeforeNodeDiscarded(node) {
     return eventDelegation.$__handleNodeDetach(node);
 }
 
-var widgetProto;
+var componentProto;
 
 /**
- * Base widget type.
+ * Base component type.
  *
  * NOTE: Any methods that are prefixed with an underscore should be considered private!
  */
-function Widget(id, doc) {
+function Component(id, doc) {
     EventEmitter.call(this);
     this.id = id;
     this.el =
@@ -3144,8 +3099,8 @@ function Widget(id, doc) {
     this.$__document = doc;
 }
 
-Widget.prototype = widgetProto = {
-    $__isWidget: true,
+Component.prototype = componentProto = {
+    $__isComponent: true,
 
     subscribeTo: function(target) {
         if (!target) {
@@ -3154,9 +3109,9 @@ Widget.prototype = widgetProto = {
 
         var subscriptions = this.$__subscriptions || (this.$__subscriptions = new SubscriptionTracker());
 
-        var subscribeToOptions = target.$__isWidget ?
-            WIDGET_SUBSCRIBE_TO_OPTIONS :
-            NON_WIDGET_SUBSCRIBE_TO_OPTIONS;
+        var subscribeToOptions = target.$__isComponent ?
+            COMPONENT_SUBSCRIBE_TO_OPTIONS :
+            NON_COMPONENT_SUBSCRIBE_TO_OPTIONS;
 
         return subscriptions.subscribeTo(target, subscribeToOptions);
     },
@@ -3177,14 +3132,14 @@ Widget.prototype = widgetProto = {
             return emit.apply(this, arguments);
         }
     },
-    getElId: function (widgetElId, index) {
-        return getElIdHelper(this, widgetElId, index);
+    getElId: function (componentElId, index) {
+        return getElIdHelper(this, componentElId, index);
     },
-    getEl: function (widgetElId, index) {
+    getEl: function (componentElId, index) {
         var doc = this.$__document;
 
-        if (widgetElId != null) {
-            return getElementById(doc, getElIdHelper(this, widgetElId, index));
+        if (componentElId != null) {
+            return getElementById(doc, getElIdHelper(this, componentElId, index));
         } else {
             return this.el || getElementById(doc, getElIdHelper(this));
         }
@@ -3199,46 +3154,43 @@ Widget.prototype = widgetProto = {
         }
         return els;
     },
-    getWidget: function(id, index) {
-        return widgetLookup[getElIdHelper(this, id, index)];
+    getComponent: function(id, index) {
+        return componentLookup[getElIdHelper(this, id, index)];
     },
-    getWidgets: function(id) {
-        var widgets = [];
+    getComponents: function(id) {
+        var components = [];
         var i = 0;
-        var widget;
-        while((widget = widgetLookup[getElIdHelper(this, id, i)])) {
-            widgets.push(widget);
+        var component;
+        while((component = componentLookup[getElIdHelper(this, id, i)])) {
+            components.push(component);
             i++;
         }
-        return widgets;
+        return components;
     },
     destroy: function() {
         if (this.$__destroyed) {
             return;
         }
 
-        var i, len;
-
         var els = this.els;
 
         this.$__destroyShallow();
 
-        var rootWidgets = this.$__rootWidgets;
-        if (rootWidgets) {
-            for (i=0, len=rootWidgets.length; i<len; i++) {
-                rootWidgets[i].destroy();
-            }
+        var rootComponents = this.$__rootComponents;
+        if (rootComponents) {
+            rootComponents.forEach(function(rootComponent) {
+                rootComponent.$__destroy();
+            });
         }
 
-        for (i=0, len=els.length; i<len; i++) {
-            var el = els[i];
+        els.forEach(function(el) {
             destroyElRecursive(el);
 
             var parentNode = el.parentNode;
             if (parentNode) {
                 parentNode.removeChild(el);
             }
-        }
+        });
     },
 
     $__destroyShallow: function() {
@@ -3260,7 +3212,7 @@ Widget.prototype = widgetProto = {
             this.$__subscriptions = null;
         }
 
-        delete widgetLookup[this.id];
+        delete componentLookup[this.id];
     },
 
     isDestroyed: function() {
@@ -3365,7 +3317,7 @@ Widget.prototype = widgetProto = {
 
     $__queueUpdate: function() {
         if (!this.$__updateQueued) {
-            updateManager.$__queueWidgetUpdate(this);
+            updateManager.$__queueComponentUpdate(this);
         }
     },
 
@@ -3388,7 +3340,7 @@ Widget.prototype = widgetProto = {
             // then we should rerender
 
             if (this.shouldUpdate(input, state) !== false) {
-                this.doUpdate();
+                this.$__rerender();
             }
         }
 
@@ -3414,21 +3366,17 @@ Widget.prototype = widgetProto = {
         return true;
     },
 
-    doUpdate: function() {
-        this.rerender();
-    },
-
     $__emitLifecycleEvent: function(eventType, eventArg1, eventArg2) {
         emitLifecycleEvent(this, eventType, eventArg1, eventArg2);
     },
 
-    rerender: function(input) {
+    $__rerender: function(input) {
         if (input) {
             this.input = input;
         }
 
         var self = this;
-        var renderer = self.renderer;
+        var renderer = self.$__renderer;
 
         if (!renderer) {
             throw TypeError();
@@ -3450,27 +3398,27 @@ Widget.prototype = widgetProto = {
             var result = new RenderResult(out);
             var targetNode = out.$__getOutput();
 
-            var widgetsContext = out.global.widgets;
+            var componentsContext = out.global.components;
 
             function onBeforeElUpdated(fromEl, toEl) {
                 var id = fromEl.id;
-                var existingWidget;
+                var existingComponent;
 
-                if (widgetsContext && id) {
-                    var preserved = widgetsContext.$__preserved[id];
+                if (componentsContext && id) {
+                    var preserved = componentsContext.$__preserved[id];
 
                     if (preserved && !preserved.$__bodyOnly) {
-                        // Don't morph elements that are associated with widgets that are being
-                        // reused or elements that are being preserved. For widgets being reused,
-                        // the morphing will take place when the reused widget updates.
+                        // Don't morph elements that are associated with components that are being
+                        // reused or elements that are being preserved. For components being reused,
+                        // the morphing will take place when the reused component updates.
                         return MORPHDOM_SKIP;
                     } else {
-                        existingWidget = getWidgetForEl(fromEl);
-                        if (existingWidget && !hasCompatibleWidget(widgetsContext, existingWidget)) {
-                            // We found a widget in an old DOM node that does not have
-                            // a compatible widget that was rendered so we need to
-                            // destroy the old widget
-                            existingWidget.$__destroyShallow();
+                        existingComponent = getComponentForEl(fromEl);
+                        if (existingComponent && !hasCompatibleComponent(componentsContext, existingComponent)) {
+                            // We found a component in an old DOM node that does not have
+                            // a compatible component that was rendered so we need to
+                            // destroy the old component
+                            existingComponent.$__destroyShallow();
                         }
                     }
                 }
@@ -3478,8 +3426,8 @@ Widget.prototype = widgetProto = {
 
             function onBeforeElChildrenUpdated(el) {
                 var id = el.id;
-                if (widgetsContext && id) {
-                    var preserved = widgetsContext.$__preserved[id];
+                if (componentsContext && id) {
+                    var preserved = componentsContext.$__preserved[id];
                     if (preserved && preserved.$__bodyOnly) {
                         // Don't morph the children since they are preserved
                         return MORPHDOM_SKIP;
@@ -3517,25 +3465,27 @@ Widget.prototype = widgetProto = {
 
             result.afterInsert(doc);
 
-            out.emit('$__widgetsInitialized');
+            out.emit('$__componentsInitialized');
         });
+
+        this.$__reset();
     },
 
     $__getRootEls: function(rootEls) {
         var i, len;
 
-        var widgetEls = this.els;
+        var componentEls = this.els;
 
-        for (i=0, len=widgetEls.length; i<len; i++) {
-            var widgetEl = widgetEls[i];
-            rootEls[widgetEl.id] = widgetEl;
+        for (i=0, len=componentEls.length; i<len; i++) {
+            var componentEl = componentEls[i];
+            rootEls[componentEl.id] = componentEl;
         }
 
-        var rootWidgets = this.$__rootWidgets;
-        if (rootWidgets) {
-            for (i=0, len=rootWidgets.length; i<len; i++) {
-                var rootWidget = rootWidgets[i];
-                rootWidget.$__getRootEls(rootEls);
+        var rootComponents = this.$__rootComponents;
+        if (rootComponents) {
+            for (i=0, len=rootComponents.length; i<len; i++) {
+                var rootComponent = rootComponents[i];
+                rootComponent.$__getRootEls(rootEls);
             }
         }
 
@@ -3553,12 +3503,29 @@ Widget.prototype = widgetProto = {
     get $__rawState() {
         var state = this.$__state;
         return state && state.$__raw;
+    },
+
+    $__setCustomEvents: function(customEvents, scope) {
+        if (customEvents) {
+            var finalCustomEvents = this.$__customEvents = {};
+            this.$__scope = scope;
+
+            customEvents.forEach(function(customEvent) {
+                var eventType = customEvent[0];
+                var targetMethodName = customEvent[1];
+                var extraArgs = customEvent[2];
+
+                finalCustomEvents[eventType] = [targetMethodName, extraArgs];
+            });
+        }
     }
 };
 
-widgetProto.elId = widgetProto.getElId;
+componentProto.elId = componentProto.getElId;
+componentProto.$__update = componentProto.update;
+componentProto.$__destroy = componentProto.destroy;
 
-// Add all of the following DOM methods to Widget.prototype:
+// Add all of the following DOM methods to Component.prototype:
 // - appendTo(referenceEl)
 // - replace(referenceEl)
 // - replaceChildrenOf(referenceEl)
@@ -3566,50 +3533,50 @@ widgetProto.elId = widgetProto.getElId;
 // - insertAfter(referenceEl)
 // - prependTo(referenceEl)
 domInsert(
-    widgetProto,
-    function getEl(widget) {
+    componentProto,
+    function getEl(component) {
         var els = this.els;
         var elCount = els.length;
         if (elCount > 1) {
-            var fragment = widget.$__document.createDocumentFragment();
-            for (var i=0; i<elCount; i++) {
-                fragment.appendChild(els[i]);
-            }
+            var fragment = component.$__document.createDocumentFragment();
+            els.forEach(function(el) {
+                fragment.appendChild(el);
+            });
             return fragment;
         } else {
             return els[0];
         }
     },
-    function afterInsert(widget) {
-        return widget;
+    function afterInsert(component) {
+        return component;
     });
 
-inherit(Widget, EventEmitter);
+inherit(Component, EventEmitter);
 
-module.exports = Widget;
+module.exports = Component;
 
 });
-$_mod.def("/marko$4.0.0-rc.18/widgets/defineWidget", function(require, exports, module, __filename, __dirname) { 'use strict';
+$_mod.def("/marko$4.0.0-rc.23/components/defineComponent", function(require, exports, module, __filename, __dirname) { 'use strict';
 /* jshint newcap:false */
 
  var BaseState;
- var BaseWidget;
+ var BaseComponent;
  var inherit;
 
-module.exports = function defineWidget(def, renderer) {
-    if (def.$__isWidget) {
+module.exports = function defineComponent(def, renderer) {
+    if (def.$__isComponent) {
         return def;
     }
 
-    var WidgetClass;
+    var ComponentClass;
     var proto;
 
     if (typeof def === 'function') {
-        WidgetClass = def;
-        proto = WidgetClass.prototype;
+        ComponentClass = def;
+        proto = ComponentClass.prototype;
     } else if (typeof def === 'object') {
-        WidgetClass = function() {};
-        proto = WidgetClass.prototype = def;
+        ComponentClass = function() {};
+        proto = ComponentClass.prototype = def;
     } else {
         throw TypeError();
     }
@@ -3617,152 +3584,140 @@ module.exports = function defineWidget(def, renderer) {
     // We don't use the constructor provided by the user
     // since we don't invoke their constructor until
     // we have had a chance to do our own initialization.
-    // Instead, we store their constructor in the "initWidget"
+    // Instead, we store their constructor in the "initComponent"
     // property and that method gets called later inside
-    // init-widgets-browser.js
-    function Widget(id, doc) {
-        BaseWidget.call(this, id, doc);
+    // init-components-browser.js
+    function Component(id, doc) {
+        BaseComponent.call(this, id, doc);
     }
 
-    if (!proto.$__isWidget) {
-        // Inherit from Widget if they didn't already
-        inherit(WidgetClass, BaseWidget);
+    if (!proto.$__isComponent) {
+        // Inherit from Component if they didn't already
+        inherit(ComponentClass, BaseComponent);
     }
 
     // The same prototype will be used by our constructor after
     // we he have set up the prototype chain using the inherit function
-    proto = Widget.prototype = WidgetClass.prototype;
+    proto = Component.prototype = ComponentClass.prototype;
 
-    proto.onCreate = proto.onCreate || WidgetClass;
+    proto.onCreate = proto.onCreate || ComponentClass;
 
-    proto.constructor = def.constructor = Widget;
+    // proto.constructor = def.constructor = Component;
 
     // Set a flag on the constructor function to make it clear this is
-    // a widget so that we can short-circuit this work later
-    Widget.$__isWidget = true;
+    // a component so that we can short-circuit this work later
+    Component.$__isComponent = true;
 
     function State() { BaseState.apply(this, arguments); }
     inherit(State, BaseState);
     proto.$__State = State;
-    proto.renderer = renderer;
+    proto.$__renderer = renderer;
 
-    return Widget;
+    return Component;
 };
 
-BaseState = require('/marko$4.0.0-rc.18/widgets/State'/*'./State'*/);
-BaseWidget = require('/marko$4.0.0-rc.18/widgets/Widget'/*'./Widget'*/);
+BaseState = require('/marko$4.0.0-rc.23/components/State'/*'./State'*/);
+BaseComponent = require('/marko$4.0.0-rc.23/components/Component'/*'./Component'*/);
 inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
 });
-$_mod.def("/marko$4.0.0-rc.18/widgets/registry-browser", function(require, exports, module, __filename, __dirname) { var loadWidget = require('/marko$4.0.0-rc.18/widgets/loadWidget-dynamic'/*'./loadWidget'*/);
-var defineWidget = require('/marko$4.0.0-rc.18/widgets/defineWidget'/*'./defineWidget'*/);
+$_mod.def("/marko$4.0.0-rc.23/components/registry-browser", function(require, exports, module, __filename, __dirname) { var loadComponent = require('/marko$4.0.0-rc.23/components/loadComponent-dynamic'/*'./loadComponent'*/);
+var defineComponent = require('/marko$4.0.0-rc.23/components/defineComponent'/*'./defineComponent'*/);
 
 var registered = {};
 var loaded = {};
-var widgetTypes = {};
+var componentTypes = {};
 
 function register(typeName, def) {
-    if (typeof def === 'function') {
-        // We do this to kick off registering of nested widgets
-        // but we don't use the return value just yet since there
-        // is a good chance that it resulted in a circular dependency
-        def();
-    }
+    // We do this to kick off registering of nested components
+    // but we don't use the return value just yet since there
+    // is a good chance that it resulted in a circular dependency
+    def();
 
     registered[typeName] = def;
     delete loaded[typeName];
-    delete widgetTypes[typeName];
+    delete componentTypes[typeName];
     return typeName;
 }
 
 function load(typeName) {
     var target = loaded[typeName];
-    if (target === undefined) {
+    if (!target) {
         target = registered[typeName];
 
-        if (typeof target === 'function') {
+        if (target) {
             target = target();
+        } else {
+            target = loadComponent(typeName); // Assume the typeName has been fully resolved already
         }
+
         if (!target) {
-            target = loadWidget(typeName); // Assume the typeName has been fully resolved already
+            throw Error('Not found: ' + typeName);
         }
-        loaded[typeName] = target || null;
+
+        loaded[typeName] = target;
     }
 
-    if (target == null) {
-        throw new Error('Unable to load: ' + typeName);
-    }
     return target;
 }
 
-function getWidgetClass(typeName) {
-    var WidgetClass = widgetTypes[typeName];
+function getComponentClass(typeName) {
+    var ComponentClass = componentTypes[typeName];
 
-    if (WidgetClass) {
-        return WidgetClass;
+    if (ComponentClass) {
+        return ComponentClass;
     }
 
-    WidgetClass = load(typeName);
+    ComponentClass = load(typeName);
 
-    if (WidgetClass.Widget) {
-        WidgetClass = WidgetClass.Widget;
+    ComponentClass = ComponentClass.Component || ComponentClass;
+
+    if (!ComponentClass.$__isComponent) {
+        ComponentClass = defineComponent(ComponentClass, ComponentClass.renderer);
     }
 
-    if (!WidgetClass.$__isWidget) {
-        WidgetClass = defineWidget(WidgetClass, WidgetClass.renderer);
-    }
+    // Make the component "type" accessible on each component instance
+    ComponentClass.prototype.$__type = typeName;
 
-    // Make the widget "type" accessible on each widget instance
-    WidgetClass.prototype.$__type = typeName;
+    componentTypes[typeName] = ComponentClass;
 
-    widgetTypes[typeName] = WidgetClass;
-
-    return WidgetClass;
+    return ComponentClass;
 }
 
-function createWidget(typeName, id) {
-    var WidgetClass = getWidgetClass(typeName);
-    var widget;
-    if (typeof WidgetClass === 'function') {
-        // The widget is a constructor function that we can invoke to create a new instance of the widget
-        widget = new WidgetClass(id);
-    } else if (WidgetClass.initWidget) {
-        widget = WidgetClass;
-    }
-    return widget;
+function createComponent(typeName, id) {
+    var ComponentClass = getComponentClass(typeName);
+    return new ComponentClass(id);
 }
 
 exports.$__register = register;
-exports.$__createWidget = createWidget;
+exports.$__createComponent = createComponent;
 
 });
-$_mod.def("/marko$4.0.0-rc.18/widgets/WidgetDef", function(require, exports, module, __filename, __dirname) { 'use strict';
-var nextRepeatedId = require('/marko$4.0.0-rc.18/widgets/nextRepeatedId'/*'./nextRepeatedId'*/);
+$_mod.def("/marko$4.0.0-rc.23/components/ComponentDef", function(require, exports, module, __filename, __dirname) { 'use strict';
+var nextRepeatedId = require('/marko$4.0.0-rc.23/components/nextRepeatedId'/*'./nextRepeatedId'*/);
 var repeatedRegExp = /\[\]$/;
-var widgetUtil = require('/marko$4.0.0-rc.18/widgets/util-browser'/*'./util'*/);
-var nextWidgetId = widgetUtil.$__nextWidgetId;
-var attachBubblingEvent = widgetUtil.$__attachBubblingEvent;
+var componentUtil = require('/marko$4.0.0-rc.23/components/util-browser'/*'./util'*/);
+var nextComponentId = componentUtil.$__nextComponentId;
+var attachBubblingEvent = componentUtil.$__attachBubblingEvent;
 
 var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
-var registry = require('/marko$4.0.0-rc.18/widgets/registry-browser'/*'./registry'*/);
+var registry = require('/marko$4.0.0-rc.23/components/registry-browser'/*'./registry'*/);
 
 /**
- * A WidgetDef is used to hold the metadata collected at runtime for
- * a single widget and this information is used to instantiate the widget
+ * A ComponentDef is used to hold the metadata collected at runtime for
+ * a single component and this information is used to instantiate the component
  * later (after the rendered HTML has been added to the DOM)
  */
-function WidgetDef(widget, widgetId, out, widgetStack, widgetStackLen) {
-    this.$__out = out; // The AsyncWriter that this widget is associated with
-    this.$__widgetStack = widgetStack;
-    this.$__widgetStackLen = widgetStackLen;
-    this.$__widget = widget;
-    this.id = widgetId;
+function ComponentDef(component, componentId, out, componentStack, componentStackLen) {
+    this.$__out = out; // The AsyncWriter that this component is associated with
+    this.$__componentStack = componentStack;
+    this.$__componentStackLen = componentStackLen;
+    this.$__component = component;
+    this.id = componentId;
 
-    this.$__scope =         // The ID of the widget that this widget is scoped within
-        this.$__customEvents =  // An array containing information about custom events
-        this.$__roots =         // IDs of root elements if there are multiple root elements
-        this.$__children = // An array of nested WidgetDef instances
+    this.$__roots =         // IDs of root elements if there are multiple root elements
+        this.$__children = // An array of nested ComponentDef instances
         this.$__domEvents = // An array of DOM events that need to be added (in sets of three)
-        this.$__bubblingDomEvents = // Used to keep track of bubbling DOM events for widgets rendered on the server
+        this.$__bubblingDomEvents = // Used to keep track of bubbling DOM events for components rendered on the server
         undefined;
 
     this.$__isExisting = false;
@@ -3770,72 +3725,72 @@ function WidgetDef(widget, widgetId, out, widgetStack, widgetStackLen) {
     this.$__nextIdIndex = 0; // The unique integer to use for the next scoped ID
 }
 
-WidgetDef.prototype = {
+ComponentDef.prototype = {
     $__end: function() {
-        this.$__widgetStack.length = this.$__widgetStackLen;
+        this.$__componentStack.length = this.$__componentStackLen;
     },
 
     /**
-     * Register a nested widget for this widget. We maintain a tree of widgets
-     * so that we can instantiate nested widgets before their parents.
+     * Register a nested component for this component. We maintain a tree of components
+     * so that we can instantiate nested components before their parents.
      */
-    $__addChild: function (widgetDef) {
+    $__addChild: function (componentDef) {
         var children = this.$__children;
 
         if (children) {
-            children.push(widgetDef);
+            children.push(componentDef);
         } else {
-            this.$__children = [widgetDef];
+            this.$__children = [componentDef];
         }
     },
     /**
      * This helper method generates a unique and fully qualified DOM element ID
-     * that is unique within the scope of the current widget. This method prefixes
-     * the the nestedId with the ID of the current widget. If nestedId ends
+     * that is unique within the scope of the current component. This method prefixes
+     * the the nestedId with the ID of the current component. If nestedId ends
      * with `[]` then it is treated as a repeated ID and we will generate
      * an ID with the current index for the current nestedId.
      * (e.g. "myParentId-foo[0]", "myParentId-foo[1]", etc.)
      */
     elId: function (nestedId) {
+        var id = this.id;
         if (nestedId == null) {
-            return this.id;
+            return id;
         } else {
             if (typeof nestedId === 'string' && repeatedRegExp.test(nestedId)) {
-                return nextRepeatedId(this.$__out, this.id, nestedId);
+                return nextRepeatedId(this.$__out, id, nestedId);
             } else {
-                return this.id + '-' + nestedId;
+                return id + '-' + nestedId;
             }
         }
     },
     /**
      * Registers a DOM event for a nested HTML element associated with the
-     * widget. This is only done for non-bubbling events that require
+     * component. This is only done for non-bubbling events that require
      * direct event listeners to be added.
      * @param  {String} type The DOM event type ("mouseover", "mousemove", etc.)
-     * @param  {String} targetMethod The name of the method to invoke on the scoped widget
+     * @param  {String} targetMethod The name of the method to invoke on the scoped component
      * @param  {String} elId The DOM element ID of the DOM element that the event listener needs to be added too
      */
      e: function(type, targetMethod, elId, extraArgs) {
-        if (!targetMethod) {
+        if (targetMethod) {
             // The event handler method is allowed to be conditional. At render time if the target
             // method is null then we do not attach any direct event listeners.
-            return;
+            (this.$__domEvents || (this.$__domEvents = [])).push([
+                type,
+                targetMethod,
+                elId,
+                extraArgs]);
         }
-
-        var domEvents = this.$__domEvents;
-        this.$__domEvents = (domEvents || (this.$__domEvents = [])).concat([
-            type,
-            targetMethod,
-            elId,
-            extraArgs]);
     },
     /**
-     * Returns the next auto generated unique ID for a nested DOM element or nested DOM widget
+     * Returns the next auto generated unique ID for a nested DOM element or nested DOM component
      */
     $__nextId: function() {
-        return this.id ?
-            this.id + '-w' + (this.$__nextIdIndex++) :
-            nextWidgetId(this.$__out);
+        var id = this.id;
+
+        return id ?
+            id + '-c' + (this.$__nextIdIndex++) :
+            nextComponentId(this.$__out);
     },
 
     d: function(handlerMethodName, extraArgs) {
@@ -3843,75 +3798,76 @@ WidgetDef.prototype = {
     }
 };
 
-WidgetDef.$__deserialize = function(o, types) {
+ComponentDef.$__deserialize = function(o, types) {
     var id        = o[0];
     var typeName  = types[o[1]];
     var input     = o[2];
     var extra     = o[3];
 
     var state = extra.s;
-    var widgetProps = extra.w;
+    var componentProps = extra.w;
 
-    var widget = typeName /* legacy */ && registry.$__createWidget(typeName, id);
+    var component = typeName /* legacy */ && registry.$__createComponent(typeName, id);
 
     if (extra.b) {
-        widget.$__bubblingDomEvents = extra.b;
+        component.$__bubblingDomEvents = extra.b;
     }
 
-
-    // Preview newly created widget from being queued for update since we area
+    // Preview newly created component from being queued for update since we area
     // just building it from the server info
-    widget.$__updateQueued = true;
+    component.$__updateQueued = true;
 
     if (state) {
         var undefinedPropNames = extra.u;
         if (undefinedPropNames) {
-            for(var i=0; i<undefinedPropNames.length; i++) {
-                state[undefinedPropNames[i]] = undefined;
-            }
+            undefinedPropNames.forEach(function(undefinedPropName) {
+                state[undefinedPropName] = undefined;
+            });
         }
         // We go through the setter here so that we convert the state object
         // to an instance of `State`
-        widget.state = state;
+        component.state = state;
     }
 
-    widget.$__input = input;
+    component.$__input = input;
 
-    if (widgetProps) {
-        extend(widget, widgetProps);
+    if (componentProps) {
+        extend(component, componentProps);
     }
+
+    var scope = extra.p;
+    var customEvents = extra.e;
+    component.$__setCustomEvents(customEvents, scope);
 
     return {
-        $__widget: widget,
+        $__component: component,
         $__roots: extra.r,
-        $__scope: extra.p,
-        $__domEvents: extra.d,
-        $__customEvents: extra.e
+        $__domEvents: extra.d
     };
 };
 
-module.exports = WidgetDef;
+module.exports = ComponentDef;
 });
-$_mod.def("/marko$4.0.0-rc.18/widgets/init-widgets-browser", function(require, exports, module, __filename, __dirname) { 'use strict';
+$_mod.def("/marko$4.0.0-rc.23/components/init-components-browser", function(require, exports, module, __filename, __dirname) { 'use strict';
 var warp10Finalize = require('/warp10$1.3.3/finalize'/*'warp10/finalize'*/);
-var eventDelegation = require('/marko$4.0.0-rc.18/widgets/event-delegation'/*'./event-delegation'*/);
+var eventDelegation = require('/marko$4.0.0-rc.23/components/event-delegation'/*'./event-delegation'*/);
 var win = window;
 var defaultDocument = document;
-var events = require('/marko$4.0.0-rc.18/runtime/events'/*'../runtime/events'*/);
-var widgetsUtil = require('/marko$4.0.0-rc.18/widgets/util-browser'/*'./util'*/);
-var widgetLookup = widgetsUtil.$__widgetLookup;
-var getElementById = widgetsUtil.$__getElementById;
-var WidgetDef = require('/marko$4.0.0-rc.18/widgets/WidgetDef'/*'./WidgetDef'*/);
+var events = require('/marko$4.0.0-rc.23/runtime/events'/*'../runtime/events'*/);
+var componentsUtil = require('/marko$4.0.0-rc.23/components/util-browser'/*'./util'*/);
+var componentLookup = componentsUtil.$__componentLookup;
+var getElementById = componentsUtil.$__getElementById;
+var ComponentDef = require('/marko$4.0.0-rc.23/components/ComponentDef'/*'./ComponentDef'*/);
 // var extend = require('raptor-util/extend');
 // var registry = require('./registry');
 
-function invokeWidgetEventHandler(widget, targetMethodName, args) {
-    var method = widget[targetMethodName];
+function invokeComponentEventHandler(component, targetMethodName, args) {
+    var method = component[targetMethodName];
     if (!method) {
         throw Error('Method not found: ' + targetMethodName);
     }
 
-    method.apply(widget, args);
+    method.apply(component, args);
 }
 
 function addEventListenerHelper(el, eventType, listener) {
@@ -3921,724 +3877,464 @@ function addEventListenerHelper(el, eventType, listener) {
     };
 }
 
-function addDOMEventListeners(widget, el, eventType, targetMethodName, extraArgs, handles) {
+function addDOMEventListeners(component, el, eventType, targetMethodName, extraArgs, handles) {
     var removeListener = addEventListenerHelper(el, eventType, function(event) {
         var args = [event, el];
         if (extraArgs) {
             args = extraArgs.concat(args);
         }
 
-        invokeWidgetEventHandler(widget, targetMethodName, args);
+        invokeComponentEventHandler(component, targetMethodName, args);
     });
     handles.push(removeListener);
 }
 
-function initWidget(widgetDef, doc) {
-    var widget = widgetDef.$__widget;
+function initComponent(componentDef, doc) {
+    var component = componentDef.$__component;
 
-    if (!widget || !widget.$__isWidget) {
+    if (!component || !component.$__isComponent) {
         return; // legacy
     }
 
-    var scope = widgetDef.$__scope;
-    var domEvents = widgetDef.$__domEvents;
-    var customEvents = widgetDef.$__customEvents;
+    var domEvents = componentDef.$__domEvents;
 
-    widget.$__reset();
-    widget.$__document = doc;
+    component.$__reset();
+    component.$__document = doc;
 
-    var isExisting = widgetDef.$__isExisting;
-    var i;
-    var len;
-    var eventType;
-    var targetMethodName;
-    var extraArgs;
-    var id = widget.id;
+    var isExisting = componentDef.$__isExisting;
+    var id = component.id;
 
-    var rootIds = widgetDef.$__roots;
+    var rootIds = componentDef.$__roots;
 
     if (rootIds) {
-        var rootWidgets;
+        var rootComponents;
 
         var els = [];
-        for (i=0, len=rootIds.length; i<len; i++) {
-            var rootId = rootIds[i];
+
+        rootIds.forEach(function(rootId) {
             var nestedId = id + '-' + rootId;
-            var rootWidget = widgetLookup[nestedId];
-            if (rootWidget) {
-                rootWidget.$__rootFor = widget;
-                if (rootWidgets) {
-                    rootWidgets.push(rootWidget);
+            var rootComponent = componentLookup[nestedId];
+            if (rootComponent) {
+                rootComponent.$__rootFor = component;
+                if (rootComponents) {
+                    rootComponents.push(rootComponent);
                 } else {
-                    rootWidgets = widget.$__rootWidgets = [rootWidget];
+                    rootComponents = component.$__rootComponents = [rootComponent];
                 }
             } else {
                 var rootEl = getElementById(doc, nestedId);
                 if (rootEl) {
-                    rootEl._w = widget;
+                    rootEl._w = component;
                     els.push(rootEl);
                 }
             }
-        }
+        });
 
-        widget.el = els[0];
-        widget.els = els;
-        widgetLookup[id] = widget;
+        component.el = els[0];
+        component.els = els;
+        componentLookup[id] = component;
     } else if (!isExisting) {
         var el = getElementById(doc, id);
-        el._w = widget;
-        widget.el = el;
-        widget.els = [el];
-        widgetLookup[id] = widget;
+        el._w = component;
+        component.el = el;
+        component.els = [el];
+        componentLookup[id] = component;
     }
 
     if (isExisting) {
-        widget.$__removeDOMEventListeners();
+        component.$__removeDOMEventListeners();
     }
 
     if (domEvents) {
         var eventListenerHandles = [];
 
-        for (i=0, len=domEvents.length; i<len; i+=4) {
-            eventType = domEvents[i];
-            targetMethodName = domEvents[i+1];
-            var eventEl = getElementById(doc, domEvents[i+2]);
-            extraArgs = domEvents[i+3];
+        domEvents.forEach(function(domEventArgs) {
+            // The event mapping is for a direct DOM event (not a custom event and not for bubblign dom events)
 
-            // The event mapping is for a DOM event (not a custom event)
-            addDOMEventListeners(widget, eventEl, eventType, targetMethodName, extraArgs, eventListenerHandles);
-        }
+            var eventType = domEventArgs[0];
+            var targetMethodName = domEventArgs[1];
+            var eventEl = getElementById(doc, domEventArgs[2]);
+            var extraArgs = domEventArgs[3];
+
+            addDOMEventListeners(component, eventEl, eventType, targetMethodName, extraArgs, eventListenerHandles);
+        });
 
         if (eventListenerHandles.length) {
-            widget.$__domEventListenerHandles = eventListenerHandles;
-        }
-    }
-
-    if (customEvents) {
-        widget.$__customEvents = {};
-        widget.$__scope = scope;
-
-        for (i=0, len=customEvents.length; i<len; i+=3) {
-            eventType = customEvents[i];
-            targetMethodName = customEvents[i+1];
-            extraArgs = customEvents[i+2];
-
-            widget.$__customEvents[eventType] = [targetMethodName, extraArgs];
+            component.$__domEventListenerHandles = eventListenerHandles;
         }
     }
 
     if (isExisting) {
-        widget.$__emitLifecycleEvent('update');
+        component.$__emitLifecycleEvent('update');
     } else {
-        events.emit('mountWidget', widget);
-        widget.$__emitLifecycleEvent('mount');
+        events.emit('mountComponent', component);
+        component.$__emitLifecycleEvent('mount');
     }
 }
 
 /**
- * This method is used to initialized widgets associated with UI components
- * rendered in the browser. While rendering UI components a "widgets context"
- * is added to the rendering context to keep up with which widgets are rendered.
- * When ready, the widgets can then be initialized by walking the widget tree
- * in the widgets context (nested widgets are initialized before ancestor widgets).
- * @param  {Array<marko-widgets/lib/WidgetDef>} widgetDefs An array of WidgetDef instances
+ * This method is used to initialized components associated with UI components
+ * rendered in the browser. While rendering UI components a "components context"
+ * is added to the rendering context to keep up with which components are rendered.
+ * When ready, the components can then be initialized by walking the component tree
+ * in the components context (nested components are initialized before ancestor components).
+ * @param  {Array<marko-components/lib/ComponentDef>} componentDefs An array of ComponentDef instances
  */
-function initClientRendered(widgetDefs, doc) {
+function initClientRendered(componentDefs, doc) {
     // Ensure that event handlers to handle delegating events are
-    // always attached before initializing any widgets
+    // always attached before initializing any components
     eventDelegation.$__init(doc);
 
     doc = doc || defaultDocument;
-    for (var i=0,len=widgetDefs.length; i<len; i++) {
-        var widgetDef = widgetDefs[i];
+    for (var i=0,len=componentDefs.length; i<len; i++) {
+        var componentDef = componentDefs[i];
 
-        if (widgetDef.$__children) {
-            initClientRendered(widgetDef.$__children, doc);
+        if (componentDef.$__children) {
+            initClientRendered(componentDef.$__children, doc);
         }
 
-        initWidget(
-            widgetDef,
+        initComponent(
+            componentDef,
             doc);
     }
 }
 
 /**
- * This method initializes all widgets that were rendered on the server by iterating over all
- * of the widget IDs.
+ * This method initializes all components that were rendered on the server by iterating over all
+ * of the component IDs.
  */
-function initServerRendered(renderedWidgets, doc) {
-    var i=0, len;
-    if (!arguments.length) {
-        renderedWidgets = win.$widgets;
+function initServerRendered(renderedComponents, doc) {
+    if (!renderedComponents) {
+        renderedComponents = win.$components;
 
-        win.$widgets = {
-            concat: initServerRendered
-        };
-
-        if (renderedWidgets && (len=renderedWidgets.length)) {
-            for (; i<len; i++) {
-                initServerRendered(renderedWidgets[i], doc);
+        if (renderedComponents) {
+            if (renderedComponents.forEach) {
+                renderedComponents.forEach(function(renderedComponent) {
+                    initServerRendered(renderedComponent, doc);
+                });
             }
+        } else {
+            win.$components = {
+                concat: initServerRendered
+            };
         }
         return;
     }
     // Ensure that event handlers to handle delegating events are
-    // always attached before initializing any widgets
+    // always attached before initializing any components
     eventDelegation.$__init(doc || defaultDocument);
 
-    renderedWidgets = warp10Finalize(renderedWidgets);
+    renderedComponents = warp10Finalize(renderedComponents);
 
-    var widgetDefs = renderedWidgets.w;
-    var typesArray = renderedWidgets.t;
+    var componentDefs = renderedComponents.w;
+    var typesArray = renderedComponents.t;
 
-    if (!doc) {
-        doc = defaultDocument;
-    }
-
-    for (len=widgetDefs.length; i<len; i++) {
-        var widgetDef = WidgetDef.$__deserialize(widgetDefs[i], typesArray);
-        initWidget(widgetDef, doc);
-    }
+    componentDefs.forEach(function(componentDef) {
+        componentDef = ComponentDef.$__deserialize(componentDef, typesArray);
+        initComponent(componentDef, doc || defaultDocument);
+    });
 }
 
 exports.$__initClientRendered = initClientRendered;
 exports.$__initServerRendered = initServerRendered;
 });
-$_mod.def("/marko$4.0.0-rc.18/widgets/boot", function(require, exports, module, __filename, __dirname) { require('/marko$4.0.0-rc.18/widgets/init-widgets-browser'/*'./init-widgets'*/).$__initServerRendered();
+$_mod.def("/marko$4.0.0-rc.23/components/boot", function(require, exports, module, __filename, __dirname) { require('/marko$4.0.0-rc.23/components/init-components-browser'/*'./init-components'*/).$__initServerRendered();
 });
-$_mod.run("/marko$4.0.0-rc.18/widgets/boot");
-$_mod.def("/marko$4.0.0-rc.18/widgets/WidgetsContext", function(require, exports, module, __filename, __dirname) { 'use strict';
-
-var WidgetDef = require('/marko$4.0.0-rc.18/widgets/WidgetDef'/*'./WidgetDef'*/);
-var initWidgets = require('/marko$4.0.0-rc.18/widgets/init-widgets-browser'/*'./init-widgets'*/);
-var EMPTY_OBJECT = {};
-
-function WidgetsContext(out, root) {
-    if (!root) {
-        root = new WidgetDef(null, null, out);
-    }
-
-    this.$__out = out;
-    this.$__widgetStack = [root];
-    this.$__preserved = EMPTY_OBJECT;
-    this.$__widgetsById = {};
-}
-
-WidgetsContext.prototype = {
-    get $__widgets() {
-        return this.$__widgetStack[0].$__children;
-    },
-
-    $__beginWidget: function(widget) {
-        var self = this;
-        var widgetStack = self.$__widgetStack;
-        var origLength = widgetStack.length;
-        var parent = widgetStack[origLength - 1];
-
-        var widgetId = widget.id;
-
-        if (!widgetId) {
-            widgetId = widget.id = parent.$__nextId();
-        }
-
-        var widgetDef = new WidgetDef(widget, widgetId, this.$__out, widgetStack, origLength);
-        this.$__widgetsById[widgetId] = widgetDef;
-        parent.$__addChild(widgetDef);
-        widgetStack.push(widgetDef);
-
-        return widgetDef;
-    },
-    $__clearWidgets: function () {
-        this.$__widgetStack = [new WidgetDef(null /* id */, this.$__out)];
-    },
-    $__initWidgets: function (doc) {
-        var widgetDefs = this.$__widgets;
-        if (widgetDefs) {
-            initWidgets.$__initClientRendered(widgetDefs, doc);
-            this.$__clearWidgets();
-        }
-    },
-    $__nextWidgetId: function() {
-        var widgetStack = this.$__widgetStack;
-        var parent = widgetStack[widgetStack.length - 1];
-        return parent.$__nextId();
-    },
-    $__preserveDOMNode: function(elId, bodyOnly) {
-        var preserved = this.$__preserved ;
-        if (preserved === EMPTY_OBJECT) {
-            preserved = this.$__preserved = {};
-        }
-        preserved[elId] = { $__bodyOnly: bodyOnly };
-    }
-};
-
-WidgetsContext.$__getWidgetsContext = function (out) {
-    var global = out.global;
-
-    return out.data.widgets ||
-        global.widgets ||
-        (global.widgets = new WidgetsContext(out));
-};
-
-module.exports = WidgetsContext;
+$_mod.run("/marko$4.0.0-rc.23/components/boot");
+$_mod.def("/marko$4.0.0-rc.23/components/util-browser", function(require, exports, module, __filename, __dirname) { var markoGlobal = window.$MG || (window.$MG = {
+    uid: 0
 });
-$_mod.def("/marko$4.0.0-rc.18/widgets/renderer", function(require, exports, module, __filename, __dirname) { var widgetsUtil = require('/marko$4.0.0-rc.18/widgets/util-browser'/*'./util'*/);
-var widgetLookup = widgetsUtil.$__widgetLookup;
-var emitLifecycleEvent = widgetsUtil.$__emitLifecycleEvent;
-var nextRepeatedId = require('/marko$4.0.0-rc.18/widgets/nextRepeatedId'/*'./nextRepeatedId'*/);
-var repeatedRegExp = /\[\]$/;
-var WidgetsContext = require('/marko$4.0.0-rc.18/widgets/WidgetsContext'/*'./WidgetsContext'*/);
-var registry = require('/marko$4.0.0-rc.18/widgets/registry-browser'/*'./registry'*/);
 
-var WIDGETS_BEGIN_ASYNC_ADDED_KEY = '$wa';
+var runtimeId = markoGlobal.uid++;
 
-function resolveWidgetRef(out, ref, scope) {
-    if (ref.charAt(0) === '#') {
-        return ref.substring(1);
-    } else {
-        var resolvedId;
+var componentLookup = {};
 
-        if (repeatedRegExp.test(ref)) {
-            resolvedId = nextRepeatedId(out, scope, ref);
-        } else {
-            resolvedId = scope + '-' + ref;
-        }
+var defaultDocument = document;
 
-        return resolvedId;
-    }
-}
+function getComponentForEl(el, doc) {
+    if (el) {
+        var node = typeof el === 'string' ? (doc || defaultDocument).getElementById(el) : el;
+        if (node) {
+            var component = node._w;
 
-function preserveWidgetEls(existingWidget, out, widgetsContext) {
-    var rootEls = existingWidget.$__getRootEls({});
-
-    for (var elId in rootEls) {
-        var el = rootEls[elId];
-
-        // We put a placeholder element in the output stream to ensure that the existing
-        // DOM node is matched up correctly when using morphdom.
-        out.element(el.tagName, { id: elId });
-
-        widgetsContext.$__preserveDOMNode(elId); // Mark the element as being preserved (for morphdom)
-    }
-
-    existingWidget.$__reset(); // The widget is no longer dirty so reset internal flags
-    return true;
-}
-
-function handleBeginAsync(event) {
-    var parentOut = event.parentOut;
-    var asyncOut = event.out;
-    var widgetsContext = asyncOut.global.widgets;
-    var widgetStack;
-
-    if (widgetsContext && (widgetStack = widgetsContext.$__widgetStack)) {
-        // All of the widgets in this async block should be
-        // initialized after the widgets in the parent. Therefore,
-        // we will create a new WidgetsContext for the nested
-        // async block and will create a new widget stack where the current
-        // widget in the parent block is the only widget in the nested
-        // stack (to begin with). This will result in top-level widgets
-        // of the async block being added as children of the widget in the
-        // parent block.
-        var nestedWidgetsContext = new WidgetsContext(asyncOut, widgetStack[widgetStack.length-1]);
-        asyncOut.data.widgets = nestedWidgetsContext;
-    }
-    asyncOut.data.$w = parentOut.data.$w;
-}
-
-
-
-function createRendererFunc(templateRenderFunc, widgetProps, renderingLogic) {
-    if (typeof renderingLogic == 'function') {
-        var ctor = renderingLogic;
-        renderingLogic = renderingLogic.prototype;
-        renderingLogic.onCreate = renderingLogic.onCreate || ctor;
-    }
-
-    renderingLogic = renderingLogic || {};
-    var onInput = renderingLogic.onInput;
-    var typeName = widgetProps.type;
-    var roots = widgetProps.roots;
-    var assignedId = widgetProps.id;
-
-    return function renderer(input, out) {
-        var outGlobal = out.global;
-
-        if (!out.isSync()) {
-            if (!outGlobal[WIDGETS_BEGIN_ASYNC_ADDED_KEY]) {
-                outGlobal[WIDGETS_BEGIN_ASYNC_ADDED_KEY] = true;
-                out.on('beginAsync', handleBeginAsync);
-            }
-        }
-
-        var widget = outGlobal.$w;
-        var isRerender = widget !== undefined;
-        var id = assignedId;
-        var isExisting;
-        var customEvents;
-        var scope;
-
-        if (widget) {
-            id = widget.id;
-            isExisting = true;
-            outGlobal.$w = null;
-        } else {
-            var widgetArgs = input && input.$w || out.data.$w;
-
-            if (widgetArgs) {
-                scope = widgetArgs[0];
-
-                if (scope) {
-                    scope = scope.id;
-                }
-
-                var ref = widgetArgs[1];
-                if (ref != null) {
-                    ref = ref.toString();
-                }
-                id = id || resolveWidgetRef(out, ref, scope);
-                customEvents = widgetArgs[2];
-                delete input.$w;
-            }
-        }
-
-        var widgetsContext = WidgetsContext.$__getWidgetsContext(out);
-        id = id || widgetsContext.$__nextWidgetId();
-
-        if (registry.$__isServer) {
-            widget = registry.$__createWidget(renderingLogic, id, input, out, typeName);
-            input = widget.$__updatedInput;
-            widget.$__updatedInput = undefined; // We don't want $__updatedInput to be serialized to the browser
-        } else {
-            if (!widget) {
-                if (isRerender) {
-                    // Look in in the DOM to see if a widget with the same ID and type already exists.
-                    widget = widgetLookup[id];
-                    if (widget && widget.$__type !== typeName) {
-                        widget = undefined;
-                    }
-                }
-
-                if (widget) {
-                    isExisting = true;
+            while(component) {
+                var rootFor = component.$__rootFor;
+                if (rootFor)  {
+                    component = rootFor;
                 } else {
-                    isExisting = false;
-                    // We need to create a new instance of the widget
-                    widget = registry.$__createWidget(typeName, id);
-                }
-
-                // Set this flag to prevent the widget from being queued for update
-                // based on the new input. The widget is about to be rerendered
-                // so we don't want to queue it up as a result of calling `setInput()`
-                widget.$__updateQueued = true;
-
-                if (!isExisting) {
-                    emitLifecycleEvent(widget, 'create', input, out);
-                }
-
-                input = widget.$__setInput(input, onInput, out);
-
-                if (isExisting) {
-                    if (!widget.$__isDirty || !widget.shouldUpdate(input, widget.$__state)) {
-                        preserveWidgetEls(widget, out, widgetsContext);
-                        return;
-                    }
+                    break;
                 }
             }
 
-            emitLifecycleEvent(widget, 'render', out);
+            return component;
         }
-
-        var widgetDef = widgetsContext.$__beginWidget(widget);
-        widgetDef.$__customEvents = customEvents;
-        widgetDef.$__scope = scope;
-        widgetDef.$__roots = roots;
-        widgetDef.$__isExisting = isExisting;
-
-        // Render the template associated with the component using the final template
-        // data that we constructed
-        templateRenderFunc(input, out, widgetDef, widget.$__rawState);
-
-        widgetDef.$__end();
-    };
-}
-
-module.exports = createRendererFunc;
-
-// exports used by the legacy renderer
-createRendererFunc.$__resolveWidgetRef = resolveWidgetRef;
-createRendererFunc.$__preserveWidgetEls = preserveWidgetEls;
-createRendererFunc.$__handleBeginAsync = handleBeginAsync;
-
-});
-$_mod.def("/marko$4.0.0-rc.18/widgets/index-browser", function(require, exports, module, __filename, __dirname) { var events = require('/marko$4.0.0-rc.18/runtime/events'/*'../runtime/events'*/);
-var Widget = require('/marko$4.0.0-rc.18/widgets/Widget'/*'./Widget'*/);
-var widgetsUtil = require('/marko$4.0.0-rc.18/widgets/util-browser'/*'./util'*/);
-
-function onInitWidget(listener) {
-    events.on('initWidget', listener);
-}
-
-exports.onInitWidget = onInitWidget;
-exports.Widget = Widget;
-exports.getWidgetForEl = widgetsUtil.$__getWidgetForEl;
-exports.initWidgets = require('/marko$4.0.0-rc.18/widgets/init-widgets-browser'/*'./init-widgets'*/).$__initServerRendered;
-
-exports.w = require('/marko$4.0.0-rc.18/widgets/defineWidget'/*'./defineWidget'*/); // Referenced by compiled templates
-exports.r = require('/marko$4.0.0-rc.18/widgets/renderer'/*'./renderer'*/); // Referenced by compiled templates
-exports.rw = require('/marko$4.0.0-rc.18/widgets/registry-browser'/*'./registry'*/).$__register;  // Referenced by compiled templates
-
-window.$__MARKO_WIDGETS = exports; // Helpful when debugging... WARNING: DO NOT USE IN REAL CODE!
-});
-$_mod.installed("behealth$0.0.1", "marko", "4.0.0-rc.18");
-$_mod.main("/marko$4.0.0-rc.18/runtime/vdom", "");
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/VComment", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.18/runtime/vdom/VNode'/*'./VNode'*/);
-var inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
-
-function VComment(value) {
-    this.$__VNode(-1 /* no children */);
-    this.nodeValue = value;
-}
-
-VComment.prototype = {
-    nodeType: 8,
-
-    actualize: function(doc) {
-        return doc.createComment(this.nodeValue);
-    },
-
-    $__cloneNode: function() {
-        return new VComment(this.nodeValue);
     }
-};
+}
 
-inherit(VComment, VNode);
+var lifecycleEventMethods = {};
 
-module.exports = VComment;
-
+[
+    'create',
+    'render',
+    'update',
+    'mount',
+    'destroy',
+].forEach(function(eventName) {
+    lifecycleEventMethods[eventName] = 'on' + eventName[0].toUpperCase() + eventName.substring(1);
 });
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/VDocumentFragment", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.18/runtime/vdom/VNode'/*'./VNode'*/);
-var inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
-var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
 
-function VDocumentFragmentClone(other) {
-    extend(this, other);
-    this.$__parentNode = undefined;
-    this.$__nextSibling = undefined;
+/**
+ * This method handles invoking a component's event handler method
+ * (if present) while also emitting the event through
+ * the standard EventEmitter.prototype.emit method.
+ *
+ * Special events and their corresponding handler methods
+ * include the following:
+ *
+ * beforeDestroy --> onBeforeDestroy
+ * destroy       --> onDestroy
+ * beforeUpdate  --> onBeforeUpdate
+ * update        --> onUpdate
+ * render        --> onRender
+ */
+function emitLifecycleEvent(component, eventType, eventArg1, eventArg2) {
+    var listenerMethod = component[lifecycleEventMethods[eventType]];
+
+    if (listenerMethod) {
+        listenerMethod.call(component, eventArg1, eventArg2);
+    }
+
+    component.emit(eventType, eventArg1, eventArg2);
 }
 
-function VDocumentFragment(documentFragment) {
-    this.$__VNode(null /* childCount */);
-    this.namespaceURI = undefined;
-}
+function destroyComponentForEl(el) {
+    var componentToDestroy = el._w;
+    if (componentToDestroy) {
+        componentToDestroy.$__destroyShallow();
+        el._w = null;
 
-VDocumentFragment.prototype = {
-    nodeType: 11,
-
-    $__DocumentFragment: true,
-
-    $__nsAware: true,
-
-    $__cloneNode: function() {
-        return new VDocumentFragmentClone(this);
-    },
-
-    actualize: function(doc) {
-        var docFragment = doc.createDocumentFragment();
-
-        var curChild = this.firstChild;
-
-        while(curChild) {
-            docFragment.appendChild(curChild.actualize(doc));
-            curChild = curChild.nextSibling;
+        while ((componentToDestroy = componentToDestroy.$__rootFor)) {
+            componentToDestroy.$__rootFor = null;
+            componentToDestroy.$__destroyShallow();
         }
-
-        return docFragment;
     }
-};
-
-inherit(VDocumentFragment, VNode);
-
-VDocumentFragmentClone.prototype = VDocumentFragment.prototype;
-
-module.exports = VDocumentFragment;
-
-});
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/VText", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.18/runtime/vdom/VNode'/*'./VNode'*/);
-var inherit = require('/raptor-util$3.1.0/inherit'/*'raptor-util/inherit'*/);
-
-function VText(value) {
-    this.$__VNode(-1 /* no children */);
-    this.nodeValue = value;
 }
-
-VText.prototype = {
-    $__Text: true,
-
-    nodeType: 3,
-
-    actualize: function(doc) {
-        return doc.createTextNode(this.nodeValue);
-    },
-
-    $__cloneNode: function() {
-        return new VText(this.nodeValue);
-    }
-};
-
-inherit(VText, VNode);
-
-module.exports = VText;
-
-});
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/vdom", function(require, exports, module, __filename, __dirname) { var VNode = require('/marko$4.0.0-rc.18/runtime/vdom/VNode'/*'./VNode'*/);
-var VComment = require('/marko$4.0.0-rc.18/runtime/vdom/VComment'/*'./VComment'*/);
-var VDocumentFragment = require('/marko$4.0.0-rc.18/runtime/vdom/VDocumentFragment'/*'./VDocumentFragment'*/);
-var VElement = require('/marko$4.0.0-rc.18/runtime/vdom/VElement'/*'./VElement'*/);
-var VText = require('/marko$4.0.0-rc.18/runtime/vdom/VText'/*'./VText'*/);
-var defaultDocument = typeof document != 'undefined' && document;
-
-var specialHtmlRegexp = /[&<]/;
-var range;
-
-function virtualizeChildNodes(node, vdomParent) {
-    var curChild = node.firstChild;
+function destroyElRecursive(el) {
+    var curChild = el.firstChild;
     while(curChild) {
-        vdomParent.$__appendChild(virtualize(curChild));
+        if (curChild.nodeType == 1) {
+            destroyComponentForEl(curChild);
+            destroyElRecursive(curChild);
+        }
         curChild = curChild.nextSibling;
     }
 }
 
-function virtualize(node) {
-    switch(node.nodeType) {
-        case 1:
-            var attributes = node.attributes;
-            var attrCount = attributes.length;
+function nextComponentId() {
+    // Each component will get an ID that is unique across all loaded
+    // marko runtimes. This allows multiple instances of marko to be
+    // loaded in the same window and they should all place nice
+    // together
+    return 'b' + ((markoGlobal.uid)++);
+}
 
-            var attrs;
+function getElementById(doc, id) {
+    return doc.getElementById(id);
+}
 
-            if (attrCount) {
-                attrs = {};
+function attachBubblingEvent(componentDef, handlerMethodName, extraArgs) {
+    if (handlerMethodName) {
+        var id = componentDef.id;
 
-                for (var i=0; i<attrCount; i++) {
-                    var attr = attributes[i];
-                    var attrName;
+        return extraArgs ?
+            [handlerMethodName, id, extraArgs] :
+            [handlerMethodName, id];
+    }
+}
 
-                    if (attr.namespaceURI === 'http://www.w3.org/1999/xlink' && attr.localName === 'href') {
-                        attrName = 'xlink:href';
-                    } else {
-                        attrName = attr.name;
-                    }
+exports.$__runtimeId = runtimeId;
+exports.$__componentLookup = componentLookup;
+exports.$__getComponentForEl = getComponentForEl;
+exports.$__emitLifecycleEvent = emitLifecycleEvent;
+exports.$__destroyComponentForEl = destroyComponentForEl;
+exports.$__destroyElRecursive = destroyElRecursive;
+exports.$__nextComponentId = nextComponentId;
+exports.$__getElementById = getElementById;
+exports.$__attachBubblingEvent = attachBubblingEvent;
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/dom-insert", function(require, exports, module, __filename, __dirname) { var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
+var componentsUtil = require('/marko$4.0.0-rc.23/components/util-browser'/*'../components/util'*/);
+var destroyComponentForEl = componentsUtil.$__destroyComponentForEl;
+var destroyElRecursive = componentsUtil.$__destroyElRecursive;
 
-                    attrs[attrName] = attr.value;
+function resolveEl(el) {
+    if (typeof el == 'string') {
+        var elId = el;
+        el = document.getElementById(elId);
+        if (!el) {
+            throw Error('Not found: ' + elId);
+        }
+    }
+    return el;
+}
+
+function beforeRemove(referenceEl) {
+    destroyElRecursive(referenceEl);
+    destroyComponentForEl(referenceEl);
+}
+
+module.exports = function(target, getEl, afterInsert) {
+    extend(target, {
+        appendTo: function(referenceEl) {
+            referenceEl = resolveEl(referenceEl);
+            var el = getEl(this, referenceEl);
+            referenceEl.appendChild(el);
+            return afterInsert(this, referenceEl);
+        },
+        prependTo: function(referenceEl) {
+            referenceEl = resolveEl(referenceEl);
+            var el = getEl(this, referenceEl);
+            referenceEl.insertBefore(el, referenceEl.firstChild || null);
+            return afterInsert(this, referenceEl);
+        },
+        replace: function(referenceEl) {
+            referenceEl = resolveEl(referenceEl);
+            var el = getEl(this, referenceEl);
+            beforeRemove(referenceEl);
+            referenceEl.parentNode.replaceChild(el, referenceEl);
+            return afterInsert(this, referenceEl);
+        },
+        replaceChildrenOf: function(referenceEl) {
+            referenceEl = resolveEl(referenceEl);
+            var el = getEl(this, referenceEl);
+
+            var curChild = referenceEl.firstChild;
+            while(curChild) {
+                var nextSibling = curChild.nextSibling; // Just in case the DOM changes while removing
+                if (curChild.nodeType == 1) {
+                    beforeRemove(curChild);
                 }
+                curChild = nextSibling;
             }
 
-            var vdomEL = new VElement(node.nodeName, attrs);
-
-            if (vdomEL.$__isTextArea) {
-                vdomEL.$__value = node.value;
+            referenceEl.innerHTML = '';
+            referenceEl.appendChild(el);
+            return afterInsert(this, referenceEl);
+        },
+        insertBefore: function(referenceEl) {
+            referenceEl = resolveEl(referenceEl);
+            var el = getEl(this, referenceEl);
+            referenceEl.parentNode.insertBefore(el, referenceEl);
+            return afterInsert(this, referenceEl);
+        },
+        insertAfter: function(referenceEl) {
+            referenceEl = resolveEl(referenceEl);
+            var el = getEl(this, referenceEl);
+            el = el;
+            var nextSibling = referenceEl.nextSibling;
+            var parentNode = referenceEl.parentNode;
+            if (nextSibling) {
+                parentNode.insertBefore(el, nextSibling);
             } else {
-                virtualizeChildNodes(node, vdomEL);
+                parentNode.appendChild(el);
             }
-
-            return vdomEL;
-        case 3:
-            return new VText(node.nodeValue);
-        case 8:
-            return new VComment(node.nodeValue);
-        case 11:
-            var vdomDocFragment = new VDocumentFragment();
-            virtualizeChildNodes(node, vdomDocFragment);
-            return vdomDocFragment;
-    }
-}
-
-function virtualizeHTML(html, doc) {
-    if (!specialHtmlRegexp.test(html)) {
-        return new VText(html);
-    }
-
-    if (!range && doc.createRange) {
-        range = doc.createRange();
-        range.selectNode(doc.body);
-    }
-
-    var vdomFragment;
-
-    var fragment;
-    if (range && range.createContextualFragment) {
-        fragment = range.createContextualFragment(html);
-        vdomFragment = virtualize(fragment);
-    } else {
-        var container = doc.createElement('body');
-        container.innerHTML = html;
-        vdomFragment = new VDocumentFragment();
-
-        var curChild = container.firstChild;
-        while(curChild) {
-            vdomFragment.$__appendChild(virtualize(curChild));
-            curChild = curChild.nextSibling;
+            return afterInsert(this, referenceEl);
         }
-    }
-
-    return vdomFragment;
-}
-
-var Node_prototype = VNode.prototype;
-
-/**
- * Shorthand method for creating and appending a Text node with a given value
- * @param  {String} value The text value for the new Text node
- */
-Node_prototype.t = function(value) {
-    var type = typeof value;
-    var vdomNode;
-
-    if (type !== 'string') {
-        if (value == null) {
-            value = '';
-        } else if (type === 'object') {
-            if (value.toHTML) {
-                vdomNode = virtualizeHTML(value.toHTML(), document);
-            }
-        }
-    }
-
-    this.$__appendChild(vdomNode || new VText(value.toString()));
-    return this.$__finishChild();
+    });
 };
-
-/**
- * Shorthand method for creating and appending a Comment node with a given value
- * @param  {String} value The value for the new Comment node
- */
-Node_prototype.c = function(value) {
-    this.$__appendChild(new VComment(value));
-    return this.$__finishChild();
-};
-
-Node_prototype.$__appendDocumentFragment = function() {
-    return this.$__appendChild(new VDocumentFragment());
-};
-
-exports.$__VComment = VComment;
-exports.$__VDocumentFragment = VDocumentFragment;
-exports.$__VElement = VElement;
-exports.$__VText = VText;
-exports.$__virtualize = virtualize;
-exports.$__virtualizeHTML = virtualizeHTML;
-exports.$__defaultDocument = defaultDocument;
 
 });
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/AsyncVDOMBuilder", function(require, exports, module, __filename, __dirname) { var EventEmitter = require('/events-light$1.0.5/src/index'/*'events-light'*/);
-var vdom = require('/marko$4.0.0-rc.18/runtime/vdom/vdom'/*'./vdom'*/);
+$_mod.def("/marko$4.0.0-rc.23/runtime/RenderResult", function(require, exports, module, __filename, __dirname) { var domInsert = require('/marko$4.0.0-rc.23/runtime/dom-insert'/*'./dom-insert'*/);
+var EMPTY_ARRAY = [];
+
+
+function getComponentDefs(result) {
+    var componentDefs = result.$__components;
+
+    if (componentDefs.length === 0) {
+        throw Error('No component');
+    }
+    return componentDefs;
+}
+
+function RenderResult(out) {
+   this.out = this.$__out = out;
+   this.$__components = undefined;
+}
+
+module.exports = RenderResult;
+
+var proto = RenderResult.prototype = {
+    getComponent: function() {
+        return this.getComponents()[0];
+    },
+    getComponents: function(selector) {
+        if (!this.$__components) {
+            throw Error('Not added to DOM');
+        }
+
+        var componentDefs = getComponentDefs(this);
+
+        var components = [];
+
+        componentDefs.forEach(function(componentDef) {
+            var component = componentDef.$__component;
+            if (!selector || selector(component)) {
+                components.push(component);
+            }
+        });
+
+        return components;
+    },
+
+    afterInsert: function(doc) {
+        var out = this.$__out;
+        var componentsContext = out.global.components;
+        if (componentsContext) {
+            this.$__components = componentsContext.$__components;
+            componentsContext.$__initComponents(doc);
+        } else {
+            this.$__components = EMPTY_ARRAY;
+        }
+
+        return this;
+    },
+    getNode: function(doc) {
+        return this.$__out.$__getNode(doc);
+    },
+    getOutput: function() {
+        return this.$__out.$__getOutput();
+    },
+    toString: function() {
+        return this.$__out.toString();
+    },
+    document: typeof document !== 'undefined' && document
+};
+
+// Add all of the following DOM methods to Component.prototype:
+// - appendTo(referenceEl)
+// - replace(referenceEl)
+// - replaceChildrenOf(referenceEl)
+// - insertBefore(referenceEl)
+// - insertAfter(referenceEl)
+// - prependTo(referenceEl)
+domInsert(
+    proto,
+    function getEl(renderResult, referenceEl) {
+        return renderResult.getNode(referenceEl.ownerDocument);
+    },
+    function afterInsert(renderResult, referenceEl) {
+        return renderResult.afterInsert(referenceEl.ownerDocument);
+    });
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/AsyncVDOMBuilder", function(require, exports, module, __filename, __dirname) { var EventEmitter = require('/events-light$1.0.5/src/index'/*'events-light'*/);
+var vdom = require('/marko$4.0.0-rc.23/runtime/vdom/vdom'/*'./vdom'*/);
 var VElement = vdom.$__VElement;
 var VDocumentFragment = vdom.$__VDocumentFragment;
 var VComment = vdom.$__VComment;
 var VText = vdom.$__VText;
 var virtualizeHTML = vdom.$__virtualizeHTML;
-var RenderResult = require('/marko$4.0.0-rc.18/runtime/RenderResult'/*'../RenderResult'*/);
+var RenderResult = require('/marko$4.0.0-rc.23/runtime/RenderResult'/*'../RenderResult'*/);
 var defaultDocument = vdom.$__defaultDocument;
 
 var FLAG_FINISHED = 1;
@@ -4952,7 +4648,7 @@ proto.h = proto.w = proto.write = proto.html;
 module.exports = AsyncVDOMBuilder;
 
 });
-$_mod.def("/marko$4.0.0-rc.18/runtime/renderable", function(require, exports, module, __filename, __dirname) { var defaultCreateOut = require('/marko$4.0.0-rc.18/runtime/createOut'/*'./createOut'*/);
+$_mod.def("/marko$4.0.0-rc.23/runtime/renderable", function(require, exports, module, __filename, __dirname) { var defaultCreateOut = require('/marko$4.0.0-rc.23/runtime/createOut'/*'./createOut'*/);
 var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
 
 module.exports = function(target, renderer) {
@@ -5045,7 +4741,7 @@ module.exports = function(target, renderer) {
                 finalOut = out;
                 shouldEnd = false;
                 extend(out.global, globalData);
-            } else if (typeof out === 'function') {
+            } else if (typeof out == 'function') {
                 finalOut = createOut(globalData);
                 callback = out;
             } else {
@@ -5076,11 +4772,11 @@ module.exports = function(target, renderer) {
     });
 };
 });
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/index", function(require, exports, module, __filename, __dirname) { 'use strict';
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/index", function(require, exports, module, __filename, __dirname) { 'use strict';
 // helpers provide a core set of various utility methods
 // that are available in every template
-var AsyncVDOMBuilder = require('/marko$4.0.0-rc.18/runtime/vdom/AsyncVDOMBuilder'/*'./AsyncVDOMBuilder'*/);
-var makeRenderable = require('/marko$4.0.0-rc.18/runtime/renderable'/*'../renderable'*/);
+var AsyncVDOMBuilder = require('/marko$4.0.0-rc.23/runtime/vdom/AsyncVDOMBuilder'/*'./AsyncVDOMBuilder'*/);
+var makeRenderable = require('/marko$4.0.0-rc.23/runtime/renderable'/*'../renderable'*/);
 
 /**
  * Method is for internal usage only. This method
@@ -5111,13 +4807,311 @@ makeRenderable(Template_prototype);
 exports.Template = Template;
 exports.$__createOut = createOut;
 
-require('/marko$4.0.0-rc.18/runtime/createOut'/*'../createOut'*/).$__setCreateOut(createOut);
+require('/marko$4.0.0-rc.23/runtime/createOut'/*'../createOut'*/).$__setCreateOut(createOut);
 
 });
-$_mod.def("/marko$4.0.0-rc.18/vdom", function(require, exports, module, __filename, __dirname) { module.exports = require('/marko$4.0.0-rc.18/runtime/vdom/index'/*'./runtime/vdom'*/);
+$_mod.def("/marko$4.0.0-rc.23/vdom", function(require, exports, module, __filename, __dirname) { module.exports = require('/marko$4.0.0-rc.23/runtime/vdom/index'/*'./runtime/vdom'*/);
 });
-$_mod.main("/marko$4.0.0-rc.18/widgets", "");
-$_mod.def("/marko$4.0.0-rc.18/runtime/helpers", function(require, exports, module, __filename, __dirname) { 'use strict';
+$_mod.main("/marko$4.0.0-rc.23/components", "");
+$_mod.remap("/marko$4.0.0-rc.23/components/index", "/marko$4.0.0-rc.23/components/index-browser");
+$_mod.def("/marko$4.0.0-rc.23/components/ComponentsContext", function(require, exports, module, __filename, __dirname) { 'use strict';
+
+var ComponentDef = require('/marko$4.0.0-rc.23/components/ComponentDef'/*'./ComponentDef'*/);
+var initComponents = require('/marko$4.0.0-rc.23/components/init-components-browser'/*'./init-components'*/);
+var EMPTY_OBJECT = {};
+
+function ComponentsContext(out, root) {
+    if (!root) {
+        root = new ComponentDef(null, null, out);
+    }
+
+    this.$__out = out;
+    this.$__componentStack = [root];
+    this.$__preserved = EMPTY_OBJECT;
+    this.$__componentsById = {};
+}
+
+ComponentsContext.prototype = {
+    get $__components() {
+        return this.$__componentStack[0].$__children;
+    },
+
+    $__beginComponent: function(component) {
+        var self = this;
+        var componentStack = self.$__componentStack;
+        var origLength = componentStack.length;
+        var parent = componentStack[origLength - 1];
+
+        var componentId = component.id;
+
+        if (!componentId) {
+            componentId = component.id = parent.$__nextId();
+        }
+
+        var componentDef = new ComponentDef(component, componentId, this.$__out, componentStack, origLength);
+        this.$__componentsById[componentId] = componentDef;
+        parent.$__addChild(componentDef);
+        componentStack.push(componentDef);
+
+        return componentDef;
+    },
+    $__clearComponents: function () {
+        this.$__componentStack = [new ComponentDef(null /* id */, this.$__out)];
+    },
+    $__initComponents: function (doc) {
+        var componentDefs = this.$__components;
+        if (componentDefs) {
+            initComponents.$__initClientRendered(componentDefs, doc);
+            this.$__clearComponents();
+        }
+    },
+    $__nextComponentId: function() {
+        var componentStack = this.$__componentStack;
+        var parent = componentStack[componentStack.length - 1];
+        return parent.$__nextId();
+    },
+    $__preserveDOMNode: function(elId, bodyOnly) {
+        var preserved = this.$__preserved ;
+        if (preserved === EMPTY_OBJECT) {
+            preserved = this.$__preserved = {};
+        }
+        preserved[elId] = { $__bodyOnly: bodyOnly };
+    }
+};
+
+ComponentsContext.$__getComponentsContext = function (out) {
+    var global = out.global;
+
+    return out.data.components ||
+        global.components ||
+        (global.components = new ComponentsContext(out));
+};
+
+module.exports = ComponentsContext;
+});
+$_mod.def("/marko$4.0.0-rc.23/components/renderer", function(require, exports, module, __filename, __dirname) { var componentsUtil = require('/marko$4.0.0-rc.23/components/util-browser'/*'./util'*/);
+var componentLookup = componentsUtil.$__componentLookup;
+var emitLifecycleEvent = componentsUtil.$__emitLifecycleEvent;
+var nextRepeatedId = require('/marko$4.0.0-rc.23/components/nextRepeatedId'/*'./nextRepeatedId'*/);
+var repeatedRegExp = /\[\]$/;
+var ComponentsContext = require('/marko$4.0.0-rc.23/components/ComponentsContext'/*'./ComponentsContext'*/);
+var registry = require('/marko$4.0.0-rc.23/components/registry-browser'/*'./registry'*/);
+var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
+
+var COMPONENT_BEGIN_ASYNC_ADDED_KEY = '$wa';
+
+function resolveComponentKey(out, key, scope) {
+    if (key.charAt(0) == '#') {
+        return key.substring(1);
+    } else {
+        var resolvedId;
+
+        if (repeatedRegExp.test(key)) {
+            resolvedId = nextRepeatedId(out, scope, key);
+        } else {
+            resolvedId = scope + '-' + key;
+        }
+
+        return resolvedId;
+    }
+}
+
+function preserveComponentEls(existingComponent, out, componentsContext) {
+    var rootEls = existingComponent.$__getRootEls({});
+
+    for (var elId in rootEls) {
+        var el = rootEls[elId];
+
+        // We put a placeholder element in the output stream to ensure that the existing
+        // DOM node is matched up correctly when using morphdom.
+        out.element(el.tagName, { id: elId });
+
+        componentsContext.$__preserveDOMNode(elId); // Mark the element as being preserved (for morphdom)
+    }
+
+    existingComponent.$__reset(); // The component is no longer dirty so reset internal flags
+    return true;
+}
+
+function handleBeginAsync(event) {
+    var parentOut = event.parentOut;
+    var asyncOut = event.out;
+    var componentsContext = asyncOut.global.components;
+    var componentStack;
+
+    if (componentsContext && (componentStack = componentsContext.$__componentStack)) {
+        // All of the components in this async block should be
+        // initialized after the components in the parent. Therefore,
+        // we will create a new ComponentsContext for the nested
+        // async block and will create a new component stack where the current
+        // component in the parent block is the only component in the nested
+        // stack (to begin with). This will result in top-level components
+        // of the async block being added as children of the component in the
+        // parent block.
+        var nestedComponentsContext = new ComponentsContext(asyncOut, componentStack[componentStack.length-1]);
+        asyncOut.data.components = nestedComponentsContext;
+    }
+    asyncOut.data.$w = parentOut.data.$w;
+}
+
+
+
+function createRendererFunc(templateRenderFunc, componentProps, renderingLogic) {
+    if (typeof renderingLogic == 'function') {
+        var ctor = renderingLogic;
+        renderingLogic = renderingLogic.prototype;
+        renderingLogic.onCreate = renderingLogic.onCreate || ctor;
+    }
+
+    renderingLogic = renderingLogic || {};
+    var onInput = renderingLogic.onInput;
+    var typeName = componentProps.type;
+    var roots = componentProps.roots;
+    var assignedId = componentProps.id;
+    var split = componentProps.split;
+
+    return function renderer(input, out) {
+        var outGlobal = out.global;
+
+        if (!out.isSync()) {
+            if (!outGlobal[COMPONENT_BEGIN_ASYNC_ADDED_KEY]) {
+                outGlobal[COMPONENT_BEGIN_ASYNC_ADDED_KEY] = true;
+                out.on('beginAsync', handleBeginAsync);
+            }
+        }
+
+        var component = outGlobal.$w;
+        var isRerender = component !== undefined;
+        var id = assignedId;
+        var isExisting;
+        var customEvents;
+        var scope;
+
+        if (component) {
+            id = component.id;
+            isExisting = true;
+            outGlobal.$w = null;
+        } else {
+            var componentArgs = input && input.$w || out.data.$w;
+
+            if (componentArgs) {
+                scope = componentArgs[0];
+
+                if (scope) {
+                    scope = scope.id;
+                }
+
+                var key = componentArgs[1];
+                if (key != null) {
+                    key = key.toString();
+                }
+                id = id || resolveComponentKey(out, key, scope);
+                customEvents = componentArgs[2];
+                delete input.$w;
+            }
+        }
+
+        var componentsContext = ComponentsContext.$__getComponentsContext(out);
+        id = id || componentsContext.$__nextComponentId();
+
+        if (registry.$__isServer) {
+            component = registry.$__createComponent(
+                renderingLogic,
+                id,
+                input,
+                out,
+                typeName,
+                customEvents,
+                scope);
+            input = component.$__updatedInput;
+            component.$__updatedInput = undefined; // We don't want $__updatedInput to be serialized to the browser
+        } else {
+            if (!component) {
+                if (isRerender) {
+                    // Look in in the DOM to see if a component with the same ID and type already exists.
+                    component = componentLookup[id];
+                    if (component && component.$__type !== typeName) {
+                        component = undefined;
+                    }
+                }
+
+                if (component) {
+                    isExisting = true;
+                } else {
+                    isExisting = false;
+                    // We need to create a new instance of the component
+                    component = registry.$__createComponent(typeName, id);
+
+                    if (split) {
+                        split = false;
+                        extend(component.constructor.prototype, renderingLogic);
+                    }
+                }
+
+                // Set this flag to prevent the component from being queued for update
+                // based on the new input. The component is about to be rerendered
+                // so we don't want to queue it up as a result of calling `setInput()`
+                component.$__updateQueued = true;
+
+                component.$__setCustomEvents(customEvents, scope);
+
+                if (!isExisting) {
+                    emitLifecycleEvent(component, 'create', input, out);
+                }
+
+                input = component.$__setInput(input, onInput, out);
+
+                if (isExisting) {
+                    if (!component.$__isDirty || !component.shouldUpdate(input, component.$__state)) {
+                        preserveComponentEls(component, out, componentsContext);
+                        return;
+                    }
+                }
+            }
+
+            emitLifecycleEvent(component, 'render', out);
+        }
+
+        var componentDef = componentsContext.$__beginComponent(component);
+        componentDef.$__roots = roots;
+        componentDef.$__isExisting = isExisting;
+
+        // Render the template associated with the component using the final template
+        // data that we constructed
+        templateRenderFunc(input, out, componentDef, component, component.$__rawState);
+
+        componentDef.$__end();
+    };
+}
+
+module.exports = createRendererFunc;
+
+// exports used by the legacy renderer
+createRendererFunc.$__resolveComponentKey = resolveComponentKey;
+createRendererFunc.$__preserveComponentEls = preserveComponentEls;
+createRendererFunc.$__handleBeginAsync = handleBeginAsync;
+
+});
+$_mod.def("/marko$4.0.0-rc.23/components/index-browser", function(require, exports, module, __filename, __dirname) { var events = require('/marko$4.0.0-rc.23/runtime/events'/*'../runtime/events'*/);
+var Component = require('/marko$4.0.0-rc.23/components/Component'/*'./Component'*/);
+var componentsUtil = require('/marko$4.0.0-rc.23/components/util-browser'/*'./util'*/);
+
+function onInitComponent(listener) {
+    events.on('initComponent', listener);
+}
+
+exports.onInitComponent = onInitComponent;
+exports.Component = Component;
+exports.getComponentForEl = componentsUtil.$__getComponentForEl;
+exports.init = require('/marko$4.0.0-rc.23/components/init-components-browser'/*'./init-components'*/).$__initServerRendered;
+
+exports.c = require('/marko$4.0.0-rc.23/components/defineComponent'/*'./defineComponent'*/); // Referenced by compiled templates
+exports.r = require('/marko$4.0.0-rc.23/components/renderer'/*'./renderer'*/); // Referenced by compiled templates
+exports.rc = require('/marko$4.0.0-rc.23/components/registry-browser'/*'./registry'*/).$__register;  // Referenced by compiled templates
+
+window.$__MARKO_COMPONENTS = exports; // Helpful when debugging... WARNING: DO NOT USE IN REAL CODE!
+});
+$_mod.def("/marko$4.0.0-rc.23/runtime/helpers", function(require, exports, module, __filename, __dirname) { 'use strict';
 var isArray = Array.isArray;
 
 function isFunction(arg) {
@@ -5239,13 +5233,13 @@ exports.cl = function classListHelper() {
     return classList(arguments);
 };
 });
-$_mod.def("/marko$4.0.0-rc.18/runtime/vdom/helpers", function(require, exports, module, __filename, __dirname) { 'use strict';
+$_mod.def("/marko$4.0.0-rc.23/runtime/vdom/helpers", function(require, exports, module, __filename, __dirname) { 'use strict';
 
-var vdom = require('/marko$4.0.0-rc.18/runtime/vdom/vdom'/*'./vdom'*/);
+var vdom = require('/marko$4.0.0-rc.23/runtime/vdom/vdom'/*'./vdom'*/);
 var VElement = vdom.$__VElement;
 var VText = vdom.$__VText;
 
-var commonHelpers = require('/marko$4.0.0-rc.18/runtime/helpers'/*'../helpers'*/);
+var commonHelpers = require('/marko$4.0.0-rc.23/runtime/helpers'/*'../helpers'*/);
 var extend = require('/raptor-util$3.1.0/extend'/*'raptor-util/extend'*/);
 
 var classList = commonHelpers.cl;
@@ -5288,8 +5282,10 @@ exports.ca = function(classNames) {
 extend(exports, commonHelpers);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/layout-inside-body-preloader/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/layout-inside-body-preloader/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onInput: function(input) {
           return {
@@ -5305,12 +5301,12 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/layout-inside-body-preloader/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/layout-inside-body-preloader/index.marko", function() {
       return module.exports;
     }),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
     marko_const_nextId = marko_const("58e43d"),
@@ -5333,7 +5329,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
           "class": "sk-rect5"
         }, 0);
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -5341,30 +5337,34 @@ function render(input, out, widget, state) {
   var sizeClassName = (input.size !== 'normal' && 'app-button-' + input.size);
 
   out.e("div", {
-      id: widget.id
+      id: __component.id
     }, 1)
     .n(marko_node0);
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType,
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType,
     id: "preloader"
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/comp-li-profile-popup/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/comp-li-profile-popup/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onCreate: function(input) {
           console.log("create ? li-comp-profile", input);
 
           this.state = {};
 
-          this.state.fullname = input.fullname;
+          this.state.fullname = input.user.fullname;
 
-          this.state.role = input.role;
+          this.state.role = input.user.role;
+
+          console.log(JSON.stringify(this.state));
         },
         onInput: function(input) {
           console.log("input", input);
@@ -5378,25 +5378,25 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             };
         },
         handleClick: function(event) {
-          console.log("click!");
+          console.log("click!", this.state);
 
           this.emit("click", {
               event: event
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/comp-li-profile-popup/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/comp-li-profile-popup/index.marko", function() {
       return module.exports;
     }),
     marko_attrs0 = {
         "class": "dropdown dropdown-access"
       },
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
-    marko_const_nextId = marko_const("6ccf50"),
+    marko_const_nextId = marko_const("f24a61"),
     marko_node0 = marko_createElement("a", {
         href: "#",
         "class": "dropdown-toggle",
@@ -5489,7 +5489,7 @@ function isActive(link,actual) {
 		return 'not-active';
 	};
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -5497,7 +5497,7 @@ function render(input, out, widget, state) {
   var sizeClassName = (input.size !== 'normal' && 'app-button-' + input.size);
 
   out.e("li", {
-      id: widget.id
+      id: __component.id
     }, 2)
     .e("div", marko_attrs0, 2)
       .n(marko_node0)
@@ -5516,15 +5516,17 @@ function render(input, out, widget, state) {
     .t(" ");
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/comp-menu/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/comp-menu/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onCreate: function(input) {},
         onInput: function(input) {
@@ -5543,12 +5545,12 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/comp-menu/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/comp-menu/index.marko", function() {
       return module.exports;
     }),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_classAttr = marko_helpers.ca,
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
@@ -6013,7 +6015,7 @@ function isActive(link,actual) {
 		return 'not-active';
 	};
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -6022,7 +6024,7 @@ function render(input, out, widget, state) {
 
   out.e("nav", {
       "class": "col-md-7 col-sm-9 col-xs-9",
-      id: widget.id
+      id: __component.id
     }, 3)
     .n(marko_node0)
     .e("div", marko_attrs0, 3)
@@ -6039,7 +6041,7 @@ function render(input, out, widget, state) {
             "class": marko_classAttr([
                 isActive("/quemsomos", out.global.url)
               ]),
-            "data-_onclick": widget.d("handleClick", [
+            "data-_onclick": __component.d("handleClick", [
                 1
               ])
           }, 1)
@@ -6063,17 +6065,19 @@ function render(input, out, widget, state) {
     .n(marko_node1);
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
 $_mod.main("/behealth$0.0.1/views/components/comp-li-profile-popup", "index.marko");
 $_mod.main("/behealth$0.0.1/views/components/comp-menu", "index.marko");
-$_mod.def("/behealth$0.0.1/views/components/layout-header/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/layout-header/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onCreate: function(input) {},
         onInput: function(input) {},
@@ -6083,13 +6087,13 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/layout-header/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/layout-header/index.marko", function() {
       return module.exports;
     }),
     comp_li_profile_popup_template = require('/behealth$0.0.1/views/components/comp-li-profile-popup/index.marko'/*"../comp-li-profile-popup"*/),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_loadTag = marko_helpers.t,
     comp_li_profile_popup_tag = marko_loadTag(comp_li_profile_popup_template),
     comp_menu_template = require('/behealth$0.0.1/views/components/comp-menu/index.marko'/*"../comp-menu"*/),
@@ -6161,7 +6165,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
               "class": "logo_sticky"
             }, 0);
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -6169,7 +6173,7 @@ function render(input, out, widget, state) {
   var sizeClassName = (input.size !== 'normal' && 'app-button-' + input.size);
 
   out.be("header", {
-      id: widget.id
+      id: __component.id
     });
 
   out.be("div", marko_attrs0);
@@ -6215,15 +6219,17 @@ function render(input, out, widget, state) {
   out.ee();
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/layout-footer/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/layout-footer/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onInput: function(input) {
           return {
@@ -6239,12 +6245,12 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/layout-footer/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/layout-footer/index.marko", function() {
       return module.exports;
     }),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
     marko_const_nextId = marko_const("c5d6f9"),
@@ -6379,7 +6385,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             .e("p", null, 1)
               .t("© Behealth 2017");
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -6387,20 +6393,22 @@ function render(input, out, widget, state) {
   var sizeClassName = (input.size !== 'normal' && 'app-button-' + input.size);
 
   out.e("footer", {
-      id: widget.id
+      id: __component.id
     }, 1)
     .n(marko_node0);
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/group-section-search/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/group-section-search/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onInput: function(input) {
           return {
@@ -6416,12 +6424,12 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/group-section-search/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/group-section-search/index.marko", function() {
       return module.exports;
     }),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
     marko_const_nextId = marko_const("b12b0a"),
@@ -7027,7 +7035,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
               }, 0)
             .t("Search now");
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -7035,21 +7043,23 @@ function render(input, out, widget, state) {
   var sizeClassName = (input.size !== 'normal' && 'app-button-' + input.size);
 
   out.e("section", {
-      id: widget.id
+      id: __component.id
     }, 1)
     .n(marko_node0);
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType,
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType,
     id: "search_container"
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/comp-banner-full-line/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/comp-banner-full-line/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onInput: function(input) {
           return {
@@ -7065,12 +7075,12 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/comp-banner-full-line/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/comp-banner-full-line/index.marko", function() {
       return module.exports;
     }),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
     marko_const_nextId = marko_const("b56df3"),
@@ -7088,7 +7098,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
       }, 1, marko_const_nextId())
       .t("saiba mais");
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -7098,7 +7108,7 @@ function render(input, out, widget, state) {
   out.e("div", {
       "class": "banner colored add_bottom_30",
       style: "margin-bottom:0",
-      id: widget.id
+      id: __component.id
     }, 5)
     .n(marko_node0)
     .n(marko_node1)
@@ -7107,15 +7117,17 @@ function render(input, out, widget, state) {
     .t(" ");
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/app-products-lines/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/app-products-lines/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onInput: function(input) {
           return {
@@ -7131,12 +7143,12 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/app-products-lines/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/app-products-lines/index.marko", function() {
       return module.exports;
     }),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
     marko_const_nextId = marko_const("00a912"),
@@ -7941,7 +7953,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
         .t("Veja todos os produtos")
       .t(" ");
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -7950,22 +7962,24 @@ function render(input, out, widget, state) {
 
   out.e("div", {
       "class": "container margin_60 bg_white bg-white",
-      id: widget.id
+      id: __component.id
     }, 3)
     .n(marko_node0)
     .n(marko_node1)
     .n(marko_node2);
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/group-box-icons/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/group-box-icons/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onInput: function(input) {
           return {
@@ -7981,12 +7995,12 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/group-box-icons/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/group-box-icons/index.marko", function() {
       return module.exports;
     }),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
     marko_const_nextId = marko_const("82eb88"),
@@ -8065,7 +8079,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
           .t("Saiba mais")
         .t(" ");
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -8074,22 +8088,24 @@ function render(input, out, widget, state) {
 
   out.e("div", {
       "class": "row",
-      id: widget.id
+      id: __component.id
     }, 3)
     .n(marko_node0)
     .n(marko_node1)
     .n(marko_node2);
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
-$_mod.def("/behealth$0.0.1/views/components/group-notebook-list/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/group-notebook-list/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onInput: function(input) {
           return {
@@ -8105,12 +8121,12 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/group-notebook-list/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/group-notebook-list/index.marko", function() {
       return module.exports;
     }),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_createElement = marko_helpers.e,
     marko_const = marko_helpers.const,
     marko_const_nextId = marko_const("cef0c9"),
@@ -8156,7 +8172,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
         .t("Experimente já")
       .t(" ");
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -8165,23 +8181,25 @@ function render(input, out, widget, state) {
 
   out.e("div", {
       "class": "row",
-      id: widget.id
+      id: __component.id
     }, 2)
     .n(marko_node0)
     .n(marko_node1);
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
 $_mod.main("/behealth$0.0.1/views/components/group-box-icons", "index.marko");
 $_mod.main("/behealth$0.0.1/views/components/group-notebook-list", "index.marko");
-$_mod.def("/behealth$0.0.1/views/components/app-white-popular/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.18 - DO NOT EDIT
-var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/vdom"*/).t(),
+$_mod.def("/behealth$0.0.1/views/components/app-white-popular/index.marko", function(require, exports, module, __filename, __dirname) { // Compiled using marko@4.0.0-rc.23 - DO NOT EDIT
+"use strict";
+
+var marko_template = module.exports = require('/marko$4.0.0-rc.23/vdom'/*"marko/vdom"*/).t(),
     marko_component = {
         onInput: function(input) {
           return {
@@ -8197,13 +8215,13 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
             });
         }
       },
-    marko_widgets = require('/marko$4.0.0-rc.18/widgets/index-browser'/*"marko/widgets"*/),
-    marko_registerWidget = marko_widgets.rw,
-    marko_widgetType = marko_registerWidget("/behealth$0.0.1/views/components/app-white-popular/index.marko", function() {
+    marko_components = require('/marko$4.0.0-rc.23/components/index-browser'/*"marko/components"*/),
+    marko_registerComponent = marko_components.rc,
+    marko_componentType = marko_registerComponent("/behealth$0.0.1/views/components/app-white-popular/index.marko", function() {
       return module.exports;
     }),
     group_box_icons_template = require('/behealth$0.0.1/views/components/group-box-icons/index.marko'/*"../group-box-icons"*/),
-    marko_helpers = require('/marko$4.0.0-rc.18/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
+    marko_helpers = require('/marko$4.0.0-rc.23/runtime/vdom/helpers'/*"marko/runtime/vdom/helpers"*/),
     marko_loadTag = marko_helpers.t,
     group_box_icons_tag = marko_loadTag(group_box_icons_template),
     group_notebook_list_template = require('/behealth$0.0.1/views/components/group-notebook-list/index.marko'/*"../group-notebook-list"*/),
@@ -8216,7 +8234,7 @@ var marko_template = module.exports = require('/marko$4.0.0-rc.18/vdom'/*"marko/
     marko_const_nextId = marko_const("f6b69c"),
     marko_node0 = marko_createElement("hr", null, 0, marko_const_nextId());
 
-function render(input, out, widget, state) {
+function render(input, out, __component, component, state) {
   var data = input;
 
   var variantClassName = (input.variant !== 'primary' && 'app-button-' + input.variant);
@@ -8225,7 +8243,7 @@ function render(input, out, widget, state) {
 
   out.be("div", {
       "class": "",
-      id: widget.id
+      id: __component.id
     });
 
   out.be("div", marko_attrs0);
@@ -8241,10 +8259,10 @@ function render(input, out, widget, state) {
   out.ee();
 }
 
-marko_template._ = marko_widgets.r(render, {
-    type: marko_widgetType
+marko_template._ = marko_components.r(render, {
+    type: marko_componentType
   }, marko_component);
 
-marko_template.Widget = marko_widgets.w(marko_component, marko_template._);
+marko_template.Component = marko_components.c(marko_component, marko_template._);
 
 });
